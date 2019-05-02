@@ -5,6 +5,3 @@ class Consumer(Entity):
 
     def __init__(self, x: int, y: int) -> None:
         super().__init__(x, y)
-
-    def draw(self, win):
-        pass
