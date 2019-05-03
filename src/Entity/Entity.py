@@ -15,6 +15,7 @@ class Entity:
     height: int
     velocity:int
     walker: Walker
+    image: pygame.Surface
 
     def __init__(self, x: int, y: int, width: int, height: int, velocity: int) -> None:
         self.x = x
@@ -23,6 +24,10 @@ class Entity:
         self.height = height
         self.velocity = velocity
         self.walker = None
+        self.image = None
+
+    def setImage(self, image):
+        self.image = pygame.transform.scale(image, (self.getWidth(), self.getHeight()))
 
     def getX(self) -> int:
         return self.x
@@ -41,6 +46,18 @@ class Entity:
 
     def getWalker(self) -> Walker:
         return self.walker
+
+    def getTopSensor(self) -> (int, int):
+        return (self.getX() + self.getWidth()/2, self.getY())
+
+    def getBottomSensor(self) -> (int, int):
+        return (self.getX() + self.getWidth()/2, self.getY() + self.getHeight())
+
+    def getLeftSensor(self) -> (int, int):
+        return (self.getX(), self.getY() + self.getHeight()/2)
+
+    def getRightSensor(self) -> (int, int):
+        return (self.getX() + self.getWidth(), self.getY() + self.getHeight()/2)
 
     def setX(self, x: int) -> Entity:
         self.x = x
@@ -64,13 +81,19 @@ class Entity:
             walker.setEntity(self)
         return self
 
+    def getRect(self):
+        return pygame.Rect(self.getX(), self.getY(), self.getWidth(), self.getHeight())
+
     def update(self) -> Entity:
         if(self.walker):
             self.walker.walk()
         return self
 
     def draw(self, screen) -> Entity:
-        pygame.draw.rect(screen, (255, 0, 0), (self.getX(), self.getY(), self.getWidth(), self.getHeight()))
+        if(self.image != None):
+            screen.blit(self.image, (self.getX(), self.getY()))
+        else:
+            pygame.draw.rect(screen, (255, 0, 0), (self.getX(), self.getY(), self.getWidth(), self.getHeight()))
         return self
 
 
