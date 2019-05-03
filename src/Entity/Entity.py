@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 import pygame
@@ -30,7 +31,7 @@ class Entity:
         self.velocity = velocity
         self.walker = None
         self.image = None
-        self.viewRange = 200
+        self.viewRange = 300
         self.setState(self.STATE_WALKING)
 
     def setState(self, state) -> Entity:
@@ -38,7 +39,7 @@ class Entity:
         return self
 
     def getState(self) -> str:
-        return self.getState()
+        return self.state
 
     def setImage(self, image):
         self.image = pygame.transform.scale(image, (self.getWidth(), self.getHeight()))
@@ -117,10 +118,16 @@ class Entity:
         return self
 
     def draw(self, screen) -> Entity:
+        if(self.walker is not None):
+            self.walker.draw(screen)
         if(self.image != None):
             screen.blit(self.image, (self.getX(), self.getY()))
         else:
             pygame.draw.rect(screen, (255, 0, 0), (self.getX(), self.getY(), self.getWidth(), self.getHeight()))
         return self
+
+    def distanceTo(self, entity: Entity) -> float:
+        return math.sqrt((self.getCenterOfMass()[0] - entity.getCenterOfMass()[0]) ** 2 +
+                         (self.getCenterOfMass()[1] - entity.getCenterOfMass()[1]) ** 2)
 
 

@@ -36,13 +36,8 @@ class Simulation:
 
 
     def openViewBetween(self, a: Entity, b: Entity):
-        stepsPerTile = 5
-
-        tileLen = sqrt(self.world.getTileWidth()**2 + self.world.getTileHeight()**2)
-
-
-        vec = (b.getX() - a.getX(), b.getY() - b.getX())
-        vecLen = sqrt(vec[0] ** 2 + vec[1]**2) * (stepsPerTile/tileLen)
+        vec = (b.getX() - a.getX(), b.getY() - a.getY())
+        vecLen = sqrt(vec[0] ** 2 + vec[1]**2)
         if(vecLen == 0):
             return True
         totalSteps = int(vecLen)

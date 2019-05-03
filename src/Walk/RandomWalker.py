@@ -3,6 +3,7 @@ from random import randint
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pygame
 
 from src.Walk.Walker import Walker
 
@@ -54,3 +55,4 @@ class RandomWalker(Walker):
 
     def positionChanged(self):
         return self.entity.getX() != self.lastX or self.entity.getY() != self.lastY
+

@@ -5,6 +5,7 @@ from random import randint
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pygame
 
 from src.Walk.Walker import Walker
 
@@ -53,3 +54,6 @@ class FollowWalker(Walker):
 
     def positionChanged(self):
         return self.entity.getX() != self.lastX or self.entity.getY() != self.lastY
+
+    def draw(self, screen):
+        pygame.draw.line(screen, (255, 0, 0), self.entity.getCenterOfMass(), self.target.getCenterOfMass(), 1)

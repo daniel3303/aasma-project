@@ -28,3 +28,6 @@ class Walker:
 
     def getSteps(self) -> int:
         return  self.steps
+
+    def draw(self, screen):
+        pass
