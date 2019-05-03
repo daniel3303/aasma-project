@@ -9,12 +9,14 @@ if TYPE_CHECKING:
 
 class Walker:
     entity: Entity
+    steps: int
 
     def __init__(self):
         self.entity = None
+        self.steps = 0
 
-    def walk(self, deltaTime: int) -> None:
-        raise MethodNotImplementedException("Not implemented")
+    def walk(self) -> None:
+        self.steps += 1
 
     def setEntity(self, entity: Entity):
         self.entity = entity
@@ -23,3 +25,6 @@ class Walker:
 
     def getEntity(self) -> Entity:
         return self.entity
+
+    def getSteps(self) -> int:
+        return  self.steps

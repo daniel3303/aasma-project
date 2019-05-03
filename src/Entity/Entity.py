@@ -5,10 +5,13 @@ from typing import TYPE_CHECKING
 import pygame
 
 if TYPE_CHECKING:
+    from src.Entity.Consumer import Consumer
     from src.Walk.Walker import Walker
+    from src.Entity.Salesman import Salesman
 
 
 class Entity:
+    STATE_WALKING = "STATE_WALKING"
     x: int
     y: int
     width: int
@@ -16,6 +19,8 @@ class Entity:
     velocity:int
     walker: Walker
     image: pygame.Surface
+    viewRange: int
+    state: str
 
     def __init__(self, x: int, y: int, width: int, height: int, velocity: int) -> None:
         self.x = x
@@ -25,6 +30,15 @@ class Entity:
         self.velocity = velocity
         self.walker = None
         self.image = None
+        self.viewRange = 200
+        self.setState(self.STATE_WALKING)
+
+    def setState(self, state) -> Entity:
+        self.state = state
+        return self
+
+    def getState(self) -> str:
+        return self.getState()
 
     def setImage(self, image):
         self.image = pygame.transform.scale(image, (self.getWidth(), self.getHeight()))
@@ -59,6 +73,9 @@ class Entity:
     def getRightSensor(self) -> (int, int):
         return (self.getX() + self.getWidth(), self.getY() + self.getHeight()/2)
 
+    def getCenterOfMass(self) -> (int, int):
+        return (self.getX() + self.getWidth() / 2, self.getY() + self.getHeight()/2)
+
     def setX(self, x: int) -> Entity:
         self.x = x
         return self
@@ -83,6 +100,16 @@ class Entity:
 
     def getRect(self):
         return pygame.Rect(self.getX(), self.getY(), self.getWidth(), self.getHeight())
+
+    def getViewRange(self) -> int:
+        return self.viewRange
+
+    def sees(self, target:Entity) -> None:
+        pass
+
+    def dontSees(self, target: Entity) -> None:
+        pass
+
 
     def update(self) -> Entity:
         if(self.walker):

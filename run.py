@@ -1,8 +1,11 @@
 import sys
 
 import pygame
+
+from src.Entity.Consumer import Consumer
 from src.Entity.Salesman import Salesman
 from src.Simulation.Simulation import Simulation
+from src.Walk.FollowWalker import FollowWalker
 from src.Walk.RandomWalker import RandomWalker
 from src.World import World
 
@@ -14,9 +17,12 @@ world = World()
 simulation = Simulation(world)
 screen = pygame.display.set_mode((world.getWorldWidth(),world.getWorldHeight()))
 
-salesman = Salesman(300,300,50,50, 6)
+salesman = Salesman(200,100,25,25, 18)
+consumer = Consumer(190,30,25,25, 18)
 salesman.setWalker(RandomWalker())
+consumer.setWalker(RandomWalker())
 simulation.addEntity(salesman)
+simulation.addEntity(consumer)
 
 
 
@@ -28,3 +34,5 @@ while True:
     screen.fill((255,255,255))
     simulation.draw(screen)
     pygame.display.update()
+    pygame.time.wait(1000//60)
+

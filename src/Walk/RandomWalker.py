@@ -19,6 +19,7 @@ class RandomWalker(Walker):
 
 
     def walk(self):
+        super().walk()
         entity = self.entity
 
         if(self.positionChanged() == False or self.remainingSteps <= 0):
@@ -26,7 +27,7 @@ class RandomWalker(Walker):
             num = randint(0,3)
             self.movement[num] = 1
             self.movement = self.movement * entity.getVelocity()
-            self.remainingSteps = randint(0,50)
+            self.remainingSteps = randint(0,200)
         else:
             self.remainingSteps -= entity.getVelocity()
 
