@@ -30,7 +30,7 @@ class FollowWalker(Walker):
         vec = (target.getX() - entity.getX(), target.getY() - entity.getY())
         vecNorm = sqrt(vec[0]**2 + vec[1]**2)
 
-        if(vecNorm < sqrt(entity.getWidth()**2 + entity.getHeight()**2)):
+        if(vecNorm < self.entity.velocity):
             return
 
         normalizedVec = (vec[0] / vecNorm, vec[1]/ vecNorm)

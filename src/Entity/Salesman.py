@@ -37,7 +37,7 @@ class Salesman(Entity):
             self.setWalker(RandomWalker())
             self.setState(self.STATE_WALKING)
 
-        if(self.getState() == self.STATE_FOLLOWING and self.distanceTo(self.walker.target) < 80):
+        if(self.getState() == self.STATE_FOLLOWING and self.distanceTo(self.walker.target) <= self.velocity):
             sold = self.tryToSell(self.walker.target)
             if(sold):
                 self.setState(self.STATE_WALKING)
@@ -51,6 +51,7 @@ class Salesman(Entity):
     def dontSees(self, target: Entity):
         if(isinstance(target, Consumer) and target == self.isFollowing(target)):
             self.setWalker(RandomWalker())
+            self.setState(RandomWalker)
 
     def addSale(self, consumer) -> None:
         self.sales.append(consumer)
