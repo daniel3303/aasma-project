@@ -27,8 +27,8 @@ class World():
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         ])
 
-        self.tileWidth = 30
-        self.tileHeight = 30
+        self.tileWidth = 50
+        self.tileHeight = 50
         self.buildingImage = self.scaleTile(AssetManager.getAsset("building"))
 
 
