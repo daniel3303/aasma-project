@@ -1,30 +1,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from src.Exception.MethodNotImplementedException import MethodNotImplementedException
 
 if TYPE_CHECKING:
-    from src.Entity.Entity import Entity
-
+    from src.Entity.Consumer import Consumer
 
 class Walker:
-    entity: Entity
+    consumer: Consumer
     steps: int
 
     def __init__(self):
-        self.entity = None
+        self.consumer = None
         self.steps = 0
 
     def walk(self) -> None:
         self.steps += 1
 
-    def setEntity(self, entity: Entity):
-        self.entity = entity
+    def setConsumer(self, entity: 'Consumer'):
+        self.consumer = entity
         if(entity.getWalker() != self):
             entity.setWalker(self)
 
-    def getEntity(self) -> Entity:
-        return self.entity
+    def getConsumer(self) -> 'Consumer':
+        return self.consumer
 
     def getSteps(self) -> int:
         return  self.steps

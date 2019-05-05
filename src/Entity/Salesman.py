@@ -7,6 +7,7 @@ import pygame
 from src.AssetManager import AssetManager
 from src.Entity.Consumer import Consumer
 from src.Entity.Entity import Entity
+from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 
 
@@ -30,8 +31,8 @@ class Salesman(Entity):
     actionSellTo: Consumer
 
 
-    def __init__(self, simulation: Simulation, x: int, y: int, width: int, height: int, velocity: int) -> None:
-        super().__init__(simulation, x, y, width, height, velocity)
+    def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
+        super().__init__(simulation, position, dimensions)
 
         # Actions state
         self.actionMoveDown = False
@@ -50,22 +51,26 @@ class Salesman(Entity):
         self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
 
     def update(self):
-        super().update()
+        super().update() #does nothing
         self.actionReward = 0
 
         if self.actionSell:
             self.simulation.sell(self, self.actionSellTo)
         if self.actionMoveUp:
-            self.moveY(-self.velocity)
+            self.getVelocity().setX(0)
+            self.getVelocity().setY(-self.maxVelocity)
             self.actionReward += self.MOVING_REWARD
         elif self.actionMoveDown:
-            self.moveY(self.velocity)
+            self.getVelocity().setX(0)
+            self.getVelocity().setY(self.maxVelocity)
             self.actionReward += self.MOVING_REWARD
         elif self.actionMoveLeft:
-            self.moveX(-self.velocity)
+            self.getVelocity().setX(-self.maxVelocity)
+            self.getVelocity().setY(0)
             self.actionReward += self.MOVING_REWARD
         elif self.actionMoveRight:
-            self.moveX(self.velocity)
+            self.getVelocity().setX(self.maxVelocity)
+            self.getVelocity().setY(0)
             self.actionReward += self.MOVING_REWARD
         else:
             self.actionReward += self.NOT_MOVING_REWARD

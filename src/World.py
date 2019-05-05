@@ -2,12 +2,13 @@ import numpy as np
 import pygame
 
 from src.AssetManager import AssetManager
+from src.Math.Vector2D import Vector2D
+from src.Tile import Tile
 
 
 class World():
     world: np.array([int])
-    tileWidth: int
-    tileHeight: int
+    tileDimensions: Vector2D
     buildingImage: object
 
     def __init__(self):
@@ -27,22 +28,27 @@ class World():
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         ])
 
-        self.tileWidth = 50
-        self.tileHeight = 50
+        self.tileDimensions = Vector2D(50,50)
         self.buildingImage = self.scaleTile(AssetManager.getAsset("building"))
 
 
-    def getTileWidth(self) -> int:
-        return self.tileWidth
+    def getTileDimensions(self) -> Vector2D:
+        return self.tileDimensions.copy()
 
-    def getTileHeight(self) -> int:
-        return self.tileHeight
+    def getTileWidth(self) -> float:
+        return self.tileDimensions.getX()
+
+    def getTileHeight(self) -> float:
+        return self.tileDimensions.getY()
+
+    def getWorldDimensions(self) -> Vector2D:
+        return Vector2D(self.getWorldWidth(), self.getWorldHeight())
 
     def getWorldWidth(self):
-        return self.tileWidth * self.world.shape[0]
+        return self.tileDimensions.getX() * self.world.shape[0]
 
     def getWorldHeight(self):
-        return self.tileHeight * self.world.shape[1]
+        return self.tileDimensions.getY() * self.world.shape[1]
 
     def scaleTile(self, image):
         return pygame.transform.scale(image, (self.getTileWidth(), self.getTileHeight()))
@@ -53,11 +59,9 @@ class World():
                 if(self.world[tileX][tileY] == 1):
                     screen.blit(self.buildingImage, (tileX*self.getTileWidth(), tileY*self.getTileHeight()))
 
-    def getTileAt(self, tile) -> (int, int):
-        return (int(tile[0] // self.getTileWidth()), int(tile[1] // self.getTileHeight()))
-
-    def getTileRect(self, tile) -> (int, int, int, int):
-        return (tile[0] * self.getTileWidth(), tile[1] * self.getTileHeight(), self.getTileWidth(), self.getTileHeight())
-
-    def isWall(self, tile):
-        return self.world[tile[0]][tile[1]] != 0
+    def getTileAt(self, position: Vector2D) -> 'Tile':
+        position = Vector2D(0,0)
+        position.setX(position.getX() // self.getTileWidth())
+        position.setY(position.getY() // self.getTileHeight())
+        isWall = self.world[position.getX()][position.getY()] != 0
+        return Tile(position, self.tileDimensions, isWall)

@@ -52,8 +52,8 @@ class Simulation:
 
     # Checks whenever entity A can see entity B in the map
     def entityCanView(self, a: Entity, b: Entity) -> bool:
-        vec = (b.getX() - a.getX(), b.getY() - a.getY())
-        vecLen = self.distanceBetween(a, b)
+        vec = b.getCenterOfMass().subtract(a.getCenterOfMass())
+        vecLen = vec.norm()
         if(vecLen == 0):
             return True
         elif(vecLen > a.getViewRange()):
@@ -61,14 +61,14 @@ class Simulation:
 
         totalSteps = int(vecLen)
 
-        normalizedVec = (vec[0]/vecLen, vec[1]/vecLen)
+        normalizedVec = vec.copy().normalize()
 
+        aPos = a.getCenterOfMass()
         for step in range(0, totalSteps):
-            x = a.getX() + normalizedVec[0] * step
-            y = a.getY() + normalizedVec[1] * step
+            aPos.sum(normalizedVec)
 
-            tile = self.world.getTileAt((x,y))
-            if(self.world.isWall(tile)):
+            tile = self.world.getTileAt(aPos)
+            if(tile.isWall()):
                 return False
 
         return True
@@ -92,27 +92,27 @@ class Simulation:
         # check collision against world walls
         # top sensor
         tileTop = self.world.getTileAt(entity.getTopSensor())
-        if(self.world.isWall(tileTop)):
-            rect = self.world.getTileRect(tileTop)
-            entity.setY(rect[1] + rect[3])
+        if(tileTop.isWall()):
+            newY = tileTop.getY() + tileTop.getHeight()
+            entity.setY(newY)
 
         # bottom sensor
         tileBottom = self.world.getTileAt(entity.getBottomSensor())
-        if (self.world.isWall(tileBottom)):
-            rect = self.world.getTileRect(tileBottom)
-            entity.setY(rect[1]-entity.getHeight())
+        if (tileBottom.isWall()):
+            newY = tileBottom.getY() - entity.getHeight()
+            entity.setY(newY)
 
         # left sensor
         tileLeft = self.world.getTileAt(entity.getLeftSensor())
-        if (self.world.isWall(tileLeft)):
-            rect = self.world.getTileRect(tileLeft)
-            entity.setX(rect[0] + rect[2])
+        if (tileLeft.isWall()):
+            newX = tileLeft.getX() + tileLeft.getWidth()
+            entity.setX(newX)
 
         # right sensor
         tileRight = self.world.getTileAt(entity.getRightSensor())
-        if (self.world.isWall(tileRight)):
-            rect = self.world.getTileRect(tileLeft)
-            entity.setX(rect[0] - entity.getWidth())
+        if (tileRight.isWall()):
+            newX = tileRight.getX() - entity.getWidth()
+            entity.setX(newX)
 
 
     # Draws the simulation

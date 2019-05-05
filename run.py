@@ -4,9 +4,8 @@ import pygame
 
 from src.Entity.Consumer import Consumer
 from src.Entity.Salesman import Salesman
+from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
-from src.Walk.FollowWalker import FollowWalker
-from src.Walk.RandomWalker import RandomWalker
 from src.World import World
 
 pygame.init()
@@ -17,18 +16,15 @@ world = World()
 simulation = Simulation(world)
 screen = pygame.display.set_mode((world.getWorldWidth(),world.getWorldHeight()))
 
-
 for i in range(0,9):
-    consumer = Consumer(simulation, 190,30,25,25, 18)
-    consumer.setWalker(RandomWalker())
+    consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25,25))
+    #consumer.setWalker(RandomWalker())
     simulation.addEntity(consumer)
 
 for i in range(0,1):
-    salesman = Salesman(simulation, 200, 100, 25, 25, 18)
-    salesman.setWalker(RandomWalker())
+    salesman = Salesman(simulation, Vector2D(200,100), Vector2D(25,25))
+    #salesman.setWalker(RandomWalker())
     simulation.addEntity(salesman)
-    simulation.addEntity(salesman)
-
 
 
 while True:

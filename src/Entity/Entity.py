@@ -1,126 +1,117 @@
 from __future__ import annotations
 
-import math
 from typing import TYPE_CHECKING
 
 import pygame
 
+from src.Math.Vector2D import Vector2D
 
 if TYPE_CHECKING:
-    from src.Walk.Walker import Walker
     from src.Simulation.Simulation import Simulation
 
 
 class Entity:
-    STATE_WALKING = "STATE_WALKING"
+    MAX_VELOCITY = 6
+    VIEW_RANGE = 300
 
     simulation: Simulation
-    x: int
-    y: int
-    width: int
-    height: int
-    velocity:int
-    walker: Walker
+    position: Vector2D
+    velocity: Vector2D
+    dimensions: Vector2D
     image: pygame.Surface
-    viewRange: int
+    viewRange: float
     state: str
     entitiesNearBy: [Entity]
+    maxVelocity: float
 
-    def __init__(self, simulation: Simulation, x: int, y: int, width: int, height: int, velocity: int) -> None:
+    def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         self.simulation = simulation
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.velocity = velocity
-        self.walker = None
+        self.position = position.copy()
+        self.dimensions = dimensions.copy()
+        self.velocity = Vector2D(0,0)
+        self.maxVelocity = Entity.MAX_VELOCITY
+
         self.image = None
-        self.viewRange = 300
-        self.setState(self.STATE_WALKING)
+        self.viewRange = Entity.VIEW_RANGE
         self.entitiesNearBy = []
-
-    def setState(self, state) -> Entity:
-        self.state = state
-        return self
-
-    def getState(self) -> str:
-        return self.state
 
     def setImage(self, image):
         self.image = pygame.transform.scale(image, (self.getWidth(), self.getHeight()))
 
-    def getX(self) -> int:
-        return self.x
+    def getPosition(self) -> 'Vector2D':
+        return self.position.copy()
 
-    def getY(self) -> int:
-        return self.y
+    def setPosition(self, position: 'Vector2D') -> Entity:
+        self.position = position
+        return self
 
-    def getWidth(self) -> int:
-        return self.width
+    def getX(self) -> float:
+        return self.position.getX()
 
-    def getHeight(self) -> int:
-        return self.height
+    def getY(self) -> float:
+        return self.position.getY()
 
-    def getVelocity(self) -> int:
+    def getDimensions(self) -> 'Vector2D':
+        return self.dimensions.copy()
+
+    def getWidth(self) -> float:
+        return self.dimensions.getX()
+
+    def getHeight(self) -> float:
+        return self.dimensions.getY()
+
+    def getVelocity(self) -> 'Vector2D':
         return self.velocity
 
-    def getWalker(self) -> Walker:
-        return self.walker
+    def setVelocity(self, velocity: 'Vector2D') -> Entity:
+        self.velocity = velocity.copy()
 
-    def getTopSensor(self) -> (int, int):
-        return (self.getX() + self.getWidth()/2, self.getY())
+    def getMaxVelocity(self) -> float:
+        return self.maxVelocity
 
-    def getBottomSensor(self) -> (int, int):
-        return (self.getX() + self.getWidth()/2, self.getY() + self.getHeight())
+    def getTopSensor(self) -> 'Vector2D':
+        sensor = self.position.copy()
+        return sensor.sumX(self.getWidth() / 2)
 
-    def getLeftSensor(self) -> (int, int):
-        return (self.getX(), self.getY() + self.getHeight()/2)
+    def getBottomSensor(self) -> 'Vector2D':
+        sensor = self.getTopSensor()
+        return sensor.sumY(self.getHeight())
 
-    def getRightSensor(self) -> (int, int):
-        return (self.getX() + self.getWidth(), self.getY() + self.getHeight()/2)
+    def getLeftSensor(self) -> 'Vector2D':
+        sensor = self.position.copy()
+        return sensor.sumY(self.getHeight() / 2)
 
-    def getCenterOfMass(self) -> (int, int):
-        return (self.getX() + self.getWidth() / 2, self.getY() + self.getHeight()/2)
+    def getRightSensor(self) -> 'Vector2D':
+        sensor = self.getLeftSensor()
+        return sensor.sumX(self.getWidth())
 
-    def setX(self, x: int) -> Entity:
-        self.x = x
+    def getCenterOfMass(self) -> 'Vector2D':
+        sensor = self.getPosition()
+        sensor.sum(self.getDimensions().divideScalar(2))
+        return sensor
+
+    def setX(self, x: float) -> Entity:
+        self.position.setX(x)
         return self
 
-    def setY(self, y: int) -> Entity:
-        self.y = y
-        return self
-
-    def moveX(self, x: int) -> Entity:
-        self.x += x
-        return self
-
-    def moveY(self, y: int) -> Entity:
-        self.y += y
-        return self
-
-    def setWalker(self, walker: Walker) -> Entity:
-        self.walker = walker
-        if(walker.getEntity() != self):
-            walker.setEntity(self)
+    def setY(self, y: float) -> Entity:
+        self.position.setY(y)
         return self
 
     def getRect(self):
         return pygame.Rect(self.getX(), self.getY(), self.getWidth(), self.getHeight())
 
-    def getViewRange(self) -> int:
+    def getViewRange(self) -> float:
         return self.viewRange
 
     def getSimulation(self) -> Simulation:
         return self.simulation
 
     def update(self) -> Entity:
-        if(self.walker):
-            self.walker.walk()
+        self.position.sum(self.velocity)
         return self
 
     def draw(self, screen) -> Entity:
-        if(self.walker is not None):
-            self.walker.draw(screen)
         if(self.image != None):
             screen.blit(self.image, (self.getX(), self.getY()))
         else:
@@ -128,8 +119,7 @@ class Entity:
         return self
 
     def distanceTo(self, entity: Entity) -> float:
-        return math.sqrt((self.getCenterOfMass()[0] - entity.getCenterOfMass()[0]) ** 2 +
-                         (self.getCenterOfMass()[1] - entity.getCenterOfMass()[1]) ** 2)
+        return self.getCenterOfMass().distanceTo(entity.getCenterOfMass())
 
     def setEntitiesNearBy(self, entities: [Entity]) -> None:
         self.entitiesNearBy = entities
