@@ -18,12 +18,10 @@ screen = pygame.display.set_mode((world.getWorldWidth(),world.getWorldHeight()))
 
 for i in range(0,9):
     consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25,25))
-    #consumer.setWalker(RandomWalker())
     simulation.addEntity(consumer)
 
 for i in range(0,1):
     salesman = Salesman(simulation, Vector2D(200,100), Vector2D(25,25))
-    #salesman.setWalker(RandomWalker())
     simulation.addEntity(salesman)
 
 

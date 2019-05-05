@@ -23,6 +23,12 @@ class Tile():
     def getY(self) -> float:
         return self.position.getY()
 
+    def getWorldX(self) -> float:
+        return self.position.getX() * self.getWidth()
+
+    def getWorldY(self) -> float:
+        return self.position.getY() * self.getHeight()
+
     def getDimensions(self) -> 'Vector2D':
         return self.dimensions.copy()
 

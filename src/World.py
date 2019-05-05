@@ -60,8 +60,23 @@ class World():
                     screen.blit(self.buildingImage, (tileX*self.getTileWidth(), tileY*self.getTileHeight()))
 
     def getTileAt(self, position: Vector2D) -> 'Tile':
-        position = Vector2D(0,0)
-        position.setX(position.getX() // self.getTileWidth())
-        position.setY(position.getY() // self.getTileHeight())
-        isWall = self.world[position.getX()][position.getY()] != 0
-        return Tile(position, self.tileDimensions, isWall)
+        tilePos = Vector2D(0,0)
+        tilePos.setX(position.getX() // self.getTileWidth())
+        tilePos.setY(position.getY() // self.getTileHeight())
+
+        x = int(tilePos.getX())
+        y = int(tilePos.getY())
+
+        # check bounds
+        if(x >= self.world.shape[0]):
+            x = self.world.shape[0] - 1
+        elif(x < 0):
+            x = 0
+
+        if (y >= self.world.shape[1]):
+            y = self.world.shape[1] - 1
+        elif (y < 0):
+            y = 0
+
+        isWall = self.world[x][y] != 0
+        return Tile(tilePos, self.tileDimensions, isWall)

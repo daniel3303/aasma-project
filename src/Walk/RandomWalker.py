@@ -29,7 +29,7 @@ class RandomWalker(Walker):
             num = randint(0,3)
             self.movement[num] = 1
             self.movement = self.movement * entity.getMaxVelocity()
-            self.remainingSteps = randint(0,200)
+            self.remainingSteps = randint(0,20)
         else:
             self.remainingSteps -= 1
 
@@ -42,6 +42,8 @@ class RandomWalker(Walker):
             self.consumer.setVelocity(Vector2D(0, self.movement[direction]))
         elif(direction == 3):
             self.consumer.setVelocity(Vector2D(0, -self.movement[direction]))
+
+        self.lastPosition = self.consumer.getPosition()
 
     def setConsumer(self, consumer: 'Consumer'):
         super().setConsumer(consumer)

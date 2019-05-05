@@ -89,29 +89,31 @@ class Simulation:
         if(entity.getY() + entity.getHeight() > self.getWorldHeight()):
             entity.setY(self.getWorldHeight()-entity.getHeight())
 
+
         # check collision against world walls
         # top sensor
         tileTop = self.world.getTileAt(entity.getTopSensor())
         if(tileTop.isWall()):
-            newY = tileTop.getY() + tileTop.getHeight()
+            newY = tileTop.getWorldY() + tileTop.getHeight()
             entity.setY(newY)
+
 
         # bottom sensor
         tileBottom = self.world.getTileAt(entity.getBottomSensor())
         if (tileBottom.isWall()):
-            newY = tileBottom.getY() - entity.getHeight()
+            newY = tileBottom.getWorldY() - entity.getHeight()
             entity.setY(newY)
 
         # left sensor
         tileLeft = self.world.getTileAt(entity.getLeftSensor())
         if (tileLeft.isWall()):
-            newX = tileLeft.getX() + tileLeft.getWidth()
+            newX = tileLeft.getWorldX() + tileLeft.getWidth()
             entity.setX(newX)
 
         # right sensor
         tileRight = self.world.getTileAt(entity.getRightSensor())
         if (tileRight.isWall()):
-            newX = tileRight.getX() - entity.getWidth()
+            newX = tileRight.getWorldX() - entity.getWidth()
             entity.setX(newX)
 
 

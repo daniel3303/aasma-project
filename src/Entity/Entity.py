@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class Entity:
-    MAX_VELOCITY = 6
+    MAX_VELOCITY = 20
     VIEW_RANGE = 300
 
     simulation: Simulation
@@ -65,6 +65,7 @@ class Entity:
 
     def setVelocity(self, velocity: 'Vector2D') -> Entity:
         self.velocity = velocity.copy()
+        return self
 
     def getMaxVelocity(self) -> float:
         return self.maxVelocity
