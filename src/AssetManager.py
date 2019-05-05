@@ -6,6 +6,7 @@ class AssetManager:
     salesman = None
     consumer = None
     building = None
+    hotspot = None
 
 
     @staticmethod
@@ -13,6 +14,7 @@ class AssetManager:
         AssetManager.salesman = pygame.image.load("assets/salesman.png")
         AssetManager.consumer = pygame.image.load("assets/consumer.png")
         AssetManager.building = pygame.image.load("assets/building.png")
+        AssetManager.hotspot = pygame.image.load("assets/hotspot.png")
 
     @staticmethod
     def getAsset(asset: str):

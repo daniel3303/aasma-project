@@ -25,7 +25,14 @@ class Simulation:
         pass
 
     def addEntity(self, entity: Entity) -> Simulation:
+        # prevents adding the same entity multiple times
+        if(entity in self.entities):
+            return self
         self.entities.append(entity)
+        return self
+
+    def removeEntity(self, entity: Entity) -> Simulation:
+        self.entities.remove(entity)
         return self
 
     def update(self) -> None:
