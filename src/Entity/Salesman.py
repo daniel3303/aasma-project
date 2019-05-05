@@ -91,13 +91,3 @@ class Salesman(Entity):
         super().draw(screen)
         textsurface = self.myfont.render(str(self.totalSold), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
-
-
-
-
-
-
-
-
-
-
