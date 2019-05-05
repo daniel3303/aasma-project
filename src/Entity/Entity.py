@@ -5,14 +5,16 @@ from typing import TYPE_CHECKING
 
 import pygame
 
+
 if TYPE_CHECKING:
-    from src.Entity.Consumer import Consumer
     from src.Walk.Walker import Walker
-    from src.Entity.Salesman import Salesman
+    from src.Simulation.Simulation import Simulation
 
 
 class Entity:
     STATE_WALKING = "STATE_WALKING"
+
+    simulation: Simulation
     x: int
     y: int
     width: int
@@ -22,8 +24,10 @@ class Entity:
     image: pygame.Surface
     viewRange: int
     state: str
+    entitiesNearBy: [Entity]
 
-    def __init__(self, x: int, y: int, width: int, height: int, velocity: int) -> None:
+    def __init__(self, simulation: Simulation, x: int, y: int, width: int, height: int, velocity: int) -> None:
+        self.simulation = simulation
         self.x = x
         self.y = y
         self.width = width
@@ -33,6 +37,7 @@ class Entity:
         self.image = None
         self.viewRange = 300
         self.setState(self.STATE_WALKING)
+        self.entitiesNearBy = []
 
     def setState(self, state) -> Entity:
         self.state = state
@@ -105,12 +110,8 @@ class Entity:
     def getViewRange(self) -> int:
         return self.viewRange
 
-    def sees(self, target:Entity) -> None:
-        pass
-
-    def dontSees(self, target: Entity) -> None:
-        pass
-
+    def getSimulation(self) -> Simulation:
+        return self.simulation
 
     def update(self) -> Entity:
         if(self.walker):
@@ -129,5 +130,11 @@ class Entity:
     def distanceTo(self, entity: Entity) -> float:
         return math.sqrt((self.getCenterOfMass()[0] - entity.getCenterOfMass()[0]) ** 2 +
                          (self.getCenterOfMass()[1] - entity.getCenterOfMass()[1]) ** 2)
+
+    def setEntitiesNearBy(self, entities: [Entity]) -> None:
+        self.entitiesNearBy = entities
+
+    def getEntitiesNearby(self) -> [Entity]:
+        return self.entitiesNearBy
 
 

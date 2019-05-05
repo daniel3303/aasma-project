@@ -7,87 +7,136 @@ import pygame
 from src.AssetManager import AssetManager
 from src.Entity.Consumer import Consumer
 from src.Entity.Entity import Entity
-from src.Walk.FollowWalker import FollowWalker
-from src.Walk.RandomWalker import RandomWalker
+from src.Simulation.Simulation import Simulation
 
 
 class Salesman(Entity):
-    # state
-    STATE_FOLLOWING = "STATE_FOLLOWING"
+    SELL_SUCCESSED_REWARD = 1
+    SELL_FAILED_REWARD = 0
+    MOVING_REWARD = -0.005
+    NOT_MOVING_REWARD = 0
 
-    SELL_VALUE = 1
-
-    # properties
-    lastTriesToSell: {Entity, int}
     sales: [Consumer]
-    totalSold: int
+    totalReward: float
+    actionReward: float
+    numSales: int
 
-    def __init__(self, x: int, y: int, width: int, height: int, velocity: int) -> None:
-        super().__init__(x, y, width, height, velocity)
-        self.setImage(AssetManager.getAsset("salesman"))
+
+    actionMoveUp: bool
+    actionMoveDown: bool
+    actionMoveLeft: bool
+    actionMoveRight: bool
+    actionSell: bool
+    actionSellTo: Consumer
+
+
+    def __init__(self, simulation: Simulation, x: int, y: int, width: int, height: int, velocity: int) -> None:
+        super().__init__(simulation, x, y, width, height, velocity)
+
+        # Actions state
+        self.actionMoveDown = False
+        self.actionMoveLeft = False
+        self.actionMoveUp = False
+        self.actionMoveRight = False
+        self.actionSell = False
+        self.actionSellTo = None
+
+        self.totalReward = 0.0
+        self.actionReward = 0.0
+        self.numSales = 0
         self.sales = []
-        self.totalSold = 0
-        self.lastTriesToSell = {}
 
+        self.setImage(AssetManager.getAsset("salesman"))
         self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
 
     def update(self):
         super().update()
-        if(self.walker != None and isinstance(self.walker, FollowWalker) and self.walker.getSteps() > 20):
-            self.setWalker(RandomWalker())
-            self.setState(self.STATE_WALKING)
+        self.actionReward = 0
 
-        if(self.getState() == self.STATE_FOLLOWING and self.distanceTo(self.walker.target) <= self.velocity):
-            sold = self.tryToSell(self.walker.target)
-            if(sold):
-                self.setState(self.STATE_WALKING)
-                self.setWalker(RandomWalker())
-
-    def sees(self, target:Entity) -> None:
-        if(isinstance(target, Consumer) and self.getState() != self.STATE_FOLLOWING and self.triedToSellRecently(target) == False):
-            self.setWalker(FollowWalker(target))
-            self.setState(self.STATE_FOLLOWING)
-
-    def dontSees(self, target: Entity):
-        if(isinstance(target, Consumer) and target == self.isFollowing(target)):
-            self.setWalker(RandomWalker())
-            self.setState(RandomWalker)
-
-    def addSale(self, consumer) -> None:
-        self.sales.append(consumer)
-        self.totalSold += self.SELL_VALUE
-
-    def addTryToSell(self, consumer) -> None:
-        self.lastTriesToSell[consumer] = int(round(time.time() * 1000))
-
-    def isFollowing(self, target: Entity):
-        return self.walker != None and isinstance(self.walker, FollowWalker) and self.walker.target == target
-
-    def tryToSell(self, consumer) -> bool:
-        sold = False
-        if(consumer.getWantsToBuy()):
-            self.onNewSale(consumer)
-            sold = True
-        self.addTryToSell(consumer)
-
-        return sold
-
-    def onNewSale(self, consumer):
-        self.addSale(consumer)
-
-    def triedToSellRecently(self, entity: Consumer):
-        if(entity not in self.lastTriesToSell.keys()):
-            return False
-
-        val = self.lastTriesToSell[entity]
-        currentTime = int(round(time.time() * 1000))
-
-        if(val == None or val + entity.MIN_TIME_BETWEEN_SELLS * 1000 >= currentTime):
-            return True
+        if self.actionSell:
+            self.simulation.sell(self, self.actionSellTo)
+        if self.actionMoveUp:
+            self.moveY(-self.velocity)
+            self.actionReward += self.MOVING_REWARD
+        elif self.actionMoveDown:
+            self.moveY(self.velocity)
+            self.actionReward += self.MOVING_REWARD
+        elif self.actionMoveLeft:
+            self.moveX(-self.velocity)
+            self.actionReward += self.MOVING_REWARD
+        elif self.actionMoveRight:
+            self.moveX(self.velocity)
+            self.actionReward += self.MOVING_REWARD
         else:
-            return False
+            self.actionReward += self.NOT_MOVING_REWARD
 
     def draw(self, screen):
         super().draw(screen)
-        textsurface = self.myfont.render(str(self.totalSold), False, (255, 0, 0))
+        textsurface = self.myfont.render(str(self.totalReward), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
+
+
+    def addSuccessSale(self, consumer) -> None:
+        self.sales.append(consumer)
+        self.totalReward += self.SELL_SUCCESSED_REWARD
+        self.numSales += 1
+        self.actionReward += self.SELL_SUCCESSED_REWARD
+
+    def addFailedSale(self, consumer) -> None:
+        self.totalReward += self.SELL_FAILED_REWARD
+        pass
+
+    def resetActionState(self) -> None:
+        self.actionMoveDown = False
+        self.actionMoveLeft = False
+        self.actionMoveUp = False
+        self.actionMoveRight = False
+        self.actionSell = False
+
+    #### AVAILABLE ACTIONS ####
+    def doNothing(self) -> None:
+        pass
+
+    def moveUp(self) -> None:
+        self.actionMoveUp = True
+
+    def moveDown(self) -> None:
+        self.actionMoveDown = True
+
+    def moveLeft(self) -> None:
+        self.actionMoveLeft = True
+
+    def moveRight(self) -> None:
+        self.actionMoveRight = True
+
+    def sell(self, consumer: Consumer) -> None:
+        self.actionSell = True
+        self.actionSellTo = consumer
+
+
+    ### AVAILABLE SENSORS ###
+
+    # Returns the reward of the last action
+    def getReward(self) -> float:
+        return self.actionReward
+
+    # Returns all the salesman nearby that we have vision to
+    def getNearbySalesmen(self) -> ['Salesman']:
+        entites = self.getEntitiesNearby()
+        salesmen = []
+        for entity in entites:
+            if(isinstance(entity, Salesman)):
+                salesmen.append(entity)
+
+        return salesmen
+
+    # Returns all the consumers nearby that we have vision to
+    def getNearbyConsumers(self) -> ['Consumer']:
+        entites = self.getEntitiesNearby()
+        consumers = []
+        for entity in entites:
+            if (isinstance(entity, Salesman)):
+                consumers.append(entity)
+
+        return consumers
+

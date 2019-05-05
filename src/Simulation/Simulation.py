@@ -2,12 +2,20 @@ from __future__ import annotations
 
 from math import sqrt
 from random import randint
+from typing import TYPE_CHECKING
 
-from src.Entity.Entity import Entity
+
+if(TYPE_CHECKING):
+    from src.Entity.Salesman import Salesman
+    from src.Entity.Entity import Entity
+    from src.Entity.Consumer import Consumer
+
 from src.World import World
 
 
 class Simulation:
+    MAX_DISTANCE_TO_ALLOW_SELL = 60
+
     entities: list[Entity]
     world: World
 
@@ -27,19 +35,30 @@ class Simulation:
 
         # check entities contact
         for entity in self.entities:
+            viewableEntities = []
             for target in self.entities:
                 if(entity != target):
-                    if(self.openViewBetween(entity, target) and self.distanceBetween(entity, target) <= entity.getViewRange()):
-                        entity.sees(target)
-                    else:
-                        entity.dontSees(target)
+                    if(self.entityCanView(entity, target)):
+                        viewableEntities.append(target)
+
+    def sell(self, seller: Salesman, buyer: Consumer):
+        if(self.distanceBetween(seller, buyer) <= self.MAX_DISTANCE_TO_ALLOW_SELL):
+            wantsToBuy = buyer.buy(seller)
+            if(wantsToBuy):
+                seller.addSale(buyer)
+            else:
+                seller.addFailedSell
 
 
-    def openViewBetween(self, a: Entity, b: Entity):
+    # Checks whenever entity A can see entity B in the map
+    def entityCanView(self, a: Entity, b: Entity) -> bool:
         vec = (b.getX() - a.getX(), b.getY() - a.getY())
-        vecLen = sqrt(vec[0] ** 2 + vec[1]**2)
+        vecLen = self.distanceBetween(a, b)
         if(vecLen == 0):
             return True
+        elif(vecLen > a.getViewRange()):
+            return False
+
         totalSteps = int(vecLen)
 
         normalizedVec = (vec[0]/vecLen, vec[1]/vecLen)
@@ -54,11 +73,13 @@ class Simulation:
 
         return True
 
-    def distanceBetween(self, a: Entity, b: Entity):
+    # Returns the distance between two entities
+    def distanceBetween(self, a: Entity, b: Entity) -> float:
         return sqrt(((a.getX() - b.getX())**2 + (a.getY() - b.getY())**2))
 
 
-    def forceInBound(self, entity: Entity):
+    # Force an entity to stay in the map free to walk zone
+    def forceInBound(self, entity: Entity) -> None:
         if(entity.getX() < 0):
             entity.setX(0)
         if(entity.getX() + entity.getWidth() > self.getWorldWidth()):
@@ -94,6 +115,7 @@ class Simulation:
             entity.setX(rect[0] - entity.getWidth())
 
 
+    # Draws the simulation
     def draw(self, screen) -> Simulation:
         self.world.draw(screen)
         for entity in self.entities:
@@ -101,10 +123,14 @@ class Simulation:
 
         return self
 
-    def getWorldHeight(self):
+
+    # Returns the height of the world
+    def getWorldHeight(self) -> int:
         return self.world.getWorldHeight()
 
-    def getWorldWidth(self):
+
+    # Returns the width of the world
+    def getWorldWidth(self) -> int:
         return self.world.getWorldWidth()
 
 
