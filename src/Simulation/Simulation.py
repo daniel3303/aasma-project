@@ -45,9 +45,9 @@ class Simulation:
         if(self.distanceBetween(seller, buyer) <= self.MAX_DISTANCE_TO_ALLOW_SELL):
             wantsToBuy = buyer.buy(seller)
             if(wantsToBuy):
-                seller.addSale(buyer)
+                seller.onSuccessSale(buyer)
             else:
-                seller.addFailedSell
+                seller.onFailedSale(buyer)
 
 
     # Checks whenever entity A can see entity B in the map

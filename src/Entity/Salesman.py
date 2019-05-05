@@ -76,13 +76,13 @@ class Salesman(Entity):
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
 
 
-    def addSuccessSale(self, consumer) -> None:
+    def onSuccessSale(self, consumer) -> None:
         self.sales.append(consumer)
         self.totalReward += self.SELL_SUCCESSED_REWARD
         self.numSales += 1
         self.actionReward += self.SELL_SUCCESSED_REWARD
 
-    def addFailedSale(self, consumer) -> None:
+    def onFailedSale(self, consumer) -> None:
         self.totalReward += self.SELL_FAILED_REWARD
         pass
 
