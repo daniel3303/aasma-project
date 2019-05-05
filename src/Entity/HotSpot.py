@@ -19,40 +19,35 @@ class HotSpot(Entity):
     MIN_HIDE_TIME = 40
     showSteps: int
     hideSteps: int
-    active: bool
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
         self.setImage(AssetManager.getAsset("hotspot"))
         self.setVelocity(Vector2D(0,0))
 
-        self.active = random.randint(0, 1) == 1
+        self.setActive(random.randint(0, 1) == 1)
         self.showSteps = random.randint(self.MIN_SHOW_TIME, self.MAX_SHOW_TIME)
         self.hideSteps = random.randint(self.MIN_HIDE_TIME, self.MAX_HIDE_TIME)
-
 
 
     def update(self):
         super().update()
 
-        if(self.active and self.showSteps > 0):
+        if(self.isActive() and self.showSteps > 0):
             self.showSteps -= 1
-        elif(self.active and self.showSteps == 0):
-            self.active = False
-        elif(not self.active and self.hideSteps > 0):
+        elif(self.isActive() and self.showSteps == 0):
+            self.setActive(False)
+        elif(not self.isActive() and self.hideSteps > 0):
             self.hideSteps -= 1
-        elif(not self.active and self.hideSteps == 0):
-            self.active = True
+        elif(not self.isActive() and self.hideSteps == 0):
+            self.setActive(True)
             self.showSteps = random.randint(self.MIN_SHOW_TIME, self.MAX_SHOW_TIME)
             self.hideSteps = random.randint(self.MIN_HIDE_TIME, self.MAX_HIDE_TIME)
 
     def draw(self, screen):
-        if(not self.active):
+        if(not self.isActive()):
             return
         super().draw(screen)
-
-    def isActive(self):
-        return self.active
 
 
 

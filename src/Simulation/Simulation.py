@@ -42,11 +42,16 @@ class Simulation:
 
         # check entities contact
         for entity in self.entities:
+            # dont check contact for inactive entities
+            if not entity.isActive():
+                continue
+
             viewableEntities = []
             for target in self.entities:
-                if(entity != target):
-                    if(self.entityCanView(entity, target)):
+                if entity != target and target.isActive():
+                    if self.entityCanView(entity, target):
                         viewableEntities.append(target)
+            entity.setEntitiesNearBy(viewableEntities)
 
     def sell(self, seller: Salesman, buyer: Consumer):
         if(self.distanceBetween(seller, buyer) <= self.MAX_DISTANCE_TO_ALLOW_SELL):
@@ -141,5 +146,11 @@ class Simulation:
     # Returns the width of the world
     def getWorldWidth(self) -> int:
         return self.world.getWorldWidth()
+
+    def getTileWidth(self) -> float:
+        return self.world.getTileWidth()
+
+    def getTileHeight(self) -> float:
+        return self.world.getTileHeight()
 
 

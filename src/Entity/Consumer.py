@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING
 
 from src.AssetManager import AssetManager
 from src.Entity.Entity import Entity
+from src.Entity.HotSpot import HotSpot
 from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
+from src.Walk.FollowHotSpotWalker import FollowHotSpotWalker
 from src.Walk.RandomWalker import RandomWalker
 from src.Walk.Walker import Walker
 
@@ -34,6 +36,14 @@ class Consumer(Entity):
 
     def update(self):
         super().update()
+
+        if isinstance(self.walker, RandomWalker):
+            for entity in self.getEntitiesNearby():
+                if isinstance(entity, HotSpot):
+                    self.setWalker(FollowHotSpotWalker(entity))
+        elif isinstance(self.walker, FollowHotSpotWalker) and self.walker.getHotspot() not in self.getEntitiesNearby():
+            self.setWalker(RandomWalker())
+
         self.walker.walk()
 
     def getWalker(self) -> 'Walker':

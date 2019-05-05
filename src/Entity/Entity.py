@@ -23,8 +23,10 @@ class Entity:
     state: str
     entitiesNearBy: [Entity]
     maxVelocity: float
+    active: bool
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
+        self.active = True
         self.simulation = simulation
         self.position = position.copy()
         self.dimensions = dimensions.copy()
@@ -32,7 +34,7 @@ class Entity:
         self.maxVelocity = Entity.MAX_VELOCITY
 
         self.image = None
-        self.viewRange = Entity.VIEW_RANGE
+        self.viewRange = self.VIEW_RANGE
         self.entitiesNearBy = []
 
     def setImage(self, image):
@@ -118,6 +120,13 @@ class Entity:
         else:
             pygame.draw.rect(screen, (255, 0, 0), (self.getX(), self.getY(), self.getWidth(), self.getHeight()))
         return self
+
+    def setActive(self, active: bool) -> Entity:
+        self.active = active
+        return self
+
+    def isActive(self) -> bool:
+        return self.active
 
     def distanceTo(self, entity: Entity) -> float:
         return self.getCenterOfMass().distanceTo(entity.getCenterOfMass())
