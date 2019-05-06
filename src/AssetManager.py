@@ -8,6 +8,7 @@ class AssetManager:
     building = None
     hotspot = None
 
+    #convert_alpha call this method
 
     @staticmethod
     def loadAssets():
