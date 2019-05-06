@@ -4,6 +4,7 @@ from math import sqrt
 from random import randint
 from typing import TYPE_CHECKING
 
+from src.Agent.AbstractAgent import AbstractAgent
 
 if(TYPE_CHECKING):
     from src.Entity.Salesman import Salesman
@@ -16,11 +17,18 @@ from src.World import World
 class Simulation:
     MAX_DISTANCE_TO_ALLOW_SELL = 60
 
-    entities: list[Entity]
+    # The entities belonging to the world
+    entities: [Entity]
+
+    # The agents that control the entities
+    agents: [AbstractAgent]
+
+    # The world instance
     world: World
 
     def __init__(self, world: World) -> None:
         self.entities = []
+        self.agents = []
         self.world = world
         pass
 
@@ -35,8 +43,22 @@ class Simulation:
         self.entities.remove(entity)
         return self
 
+    def addAgent(self, agent: AbstractAgent) -> Simulation:
+        # prevents adding the same entity multiple times
+        if(agent in self.agents):
+            return self
+        self.agents.append(agent)
+        return self
+
+    def removeAgent(self, agent: AbstractAgent) -> Simulation:
+        self.agents.remove(agent)
+        return self
+
     def update(self) -> None:
-        for entity in self.entities :
+        for agent in self.agents:
+            agent.decide()
+
+        for entity in self.entities:
             entity.update()
             self.forceInBound(entity)
 

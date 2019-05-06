@@ -5,19 +5,21 @@ from typing import TYPE_CHECKING
 import pygame
 
 from src.AssetManager import AssetManager
-from src.Entity.Consumer import Consumer
 from src.Entity.Entity import Entity
+from src.Entity.HotSpot import HotSpot
 from src.Math.Vector2D import Vector2D
-from src.Simulation.Simulation import Simulation
 
+if TYPE_CHECKING:
+    from src.Entity.Consumer import Consumer
+    from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
     SELL_SUCCESSED_REWARD = 1
-    SELL_FAILED_REWARD = 0
+    SELL_FAILED_REWARD = -0.03
     MOVING_REWARD = -0.005
-    NOT_MOVING_REWARD = 0
+    NOT_MOVING_REWARD = -0.001
 
-    sales: [Consumer]
+    sales: ['Consumer']
     totalReward: float
     actionReward: float
     numSales: int
@@ -28,10 +30,10 @@ class Salesman(Entity):
     actionMoveLeft: bool
     actionMoveRight: bool
     actionSell: bool
-    actionSellTo: Consumer
+    actionSellTo: 'Consumer'
 
 
-    def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
+    def __init__(self, simulation: 'Simulation', position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
 
         # Actions state
@@ -56,6 +58,7 @@ class Salesman(Entity):
 
         if self.actionSell:
             self.simulation.sell(self, self.actionSellTo)
+
         if self.actionMoveUp:
             self.getVelocity().setX(0)
             self.getVelocity().setY(-self.maxVelocity)
@@ -75,21 +78,26 @@ class Salesman(Entity):
         else:
             self.actionReward += self.NOT_MOVING_REWARD
 
+        # Updated the total reward based on the outcome of the last decisions
+        self.totalReward += self.actionReward
+
+
+        # Clear the action picked for this iteration
+        self.resetActionState()
+
     def draw(self, screen):
         super().draw(screen)
-        textsurface = self.myfont.render(str(self.totalReward), False, (255, 0, 0))
+        textsurface = self.myfont.render("{0:.2f}".format(self.totalReward), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
 
 
     def onSuccessSale(self, consumer) -> None:
         self.sales.append(consumer)
-        self.totalReward += self.SELL_SUCCESSED_REWARD
         self.numSales += 1
         self.actionReward += self.SELL_SUCCESSED_REWARD
 
     def onFailedSale(self, consumer) -> None:
-        self.totalReward += self.SELL_FAILED_REWARD
-        pass
+        self.actionReward += self.SELL_FAILED_REWARD
 
     def resetActionState(self) -> None:
         self.actionMoveDown = False
@@ -97,10 +105,11 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
+        self.actionSellTo = None
 
     #### AVAILABLE ACTIONS ####
     def doNothing(self) -> None:
-        pass
+        self.resetActionState()
 
     def moveUp(self) -> None:
         self.actionMoveUp = True
@@ -114,7 +123,7 @@ class Salesman(Entity):
     def moveRight(self) -> None:
         self.actionMoveRight = True
 
-    def sell(self, consumer: Consumer) -> None:
+    def sellTo(self, consumer: 'Consumer') -> None:
         self.actionSell = True
         self.actionSellTo = consumer
 
@@ -122,7 +131,7 @@ class Salesman(Entity):
     ### AVAILABLE SENSORS ###
 
     # Returns the reward of the last action
-    def getReward(self) -> float:
+    def getLastReward(self) -> float:
         return self.actionReward
 
     # Returns all the salesman nearby that we have vision to
@@ -137,11 +146,22 @@ class Salesman(Entity):
 
     # Returns all the consumers nearby that we have vision to
     def getNearbyConsumers(self) -> ['Consumer']:
+        from src.Entity.Consumer import Consumer
         entites = self.getEntitiesNearby()
         consumers = []
         for entity in entites:
-            if (isinstance(entity, Salesman)):
+            if (isinstance(entity, Consumer)):
                 consumers.append(entity)
 
         return consumers
+
+    # Returns all the hotspots nearby that we have vision to
+    def getNearbyHotSpots(self) -> ['HotSpot']:
+        entites = self.getEntitiesNearby()
+        salesmen = []
+        for entity in entites:
+            if (isinstance(entity, HotSpot)):
+                salesmen.append(entity)
+
+        return salesmen
 

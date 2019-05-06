@@ -5,12 +5,10 @@ from typing import TYPE_CHECKING
 from src.AssetManager import AssetManager
 from src.Entity.Entity import Entity
 from src.Math.Vector2D import Vector2D
-from src.Simulation.Simulation import Simulation
-from src.Walk.RandomWalker import RandomWalker
-from src.Walk.Walker import Walker
 
 if TYPE_CHECKING:
-    from src.Entity.Salesman import Salesman
+    from src.Simulation.Simulation import Simulation
+
 
 class HotSpot(Entity):
     MAX_SHOW_TIME = 60
@@ -20,7 +18,7 @@ class HotSpot(Entity):
     showSteps: int
     hideSteps: int
 
-    def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
+    def __init__(self, simulation: 'Simulation', position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
         self.setImage(AssetManager.getAsset("hotspot"))
         self.setVelocity(Vector2D(0,0))

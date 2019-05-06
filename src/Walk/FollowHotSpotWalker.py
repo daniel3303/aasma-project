@@ -22,7 +22,7 @@ class FollowHotSpotWalker(Walker):
     def __init__(self, hotspot: HotSpot):
         super().__init__()
         self.hotspot = hotspot
-        self.minHotSpotDistance = randint(0, int(self.hotspot.getSimulation().getTileWidth()*1.5))
+        self.minHotSpotDistance = randint(1, int(self.hotspot.getSimulation().getTileWidth()*1.5))
 
     def walk(self):
         super().walk()

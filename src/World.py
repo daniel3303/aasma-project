@@ -28,7 +28,7 @@ class World():
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         ])
 
-        self.tileDimensions = Vector2D(50,50)
+        self.tileDimensions = Vector2D(30,30)
         self.buildingImage = self.scaleTile(AssetManager.getAsset("building"))
 
 
