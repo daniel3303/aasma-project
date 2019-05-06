@@ -31,7 +31,7 @@ hotspot = HotSpot(simulation, Vector2D(300,300), Vector2D(25,25))
 simulation.addEntity(hotspot)
 
 
-for i in range(0,9):
+for i in range(0,8):
     consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25,25))
     simulation.addEntity(consumer)
 
@@ -47,7 +47,8 @@ while True:
 
     simulation.update()
     screen.fill((255,255,255))
-    simulation.draw(screen)
+    #simulation.draw(screen)
+    simulation.outputToConsole()
     pygame.display.update()
     pygame.time.wait(1000//60)
 

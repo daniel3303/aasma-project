@@ -15,6 +15,7 @@ class ReactiveAgent(AbstractAgent):
         self.walkCounter = random.randint(1,20)
         self.possibleDirections = ["up", "down", "left", "right"]
         self.direction = random.choice(self.possibleDirections)
+        salesman.setName("Reactive Salesman")
 
 
 

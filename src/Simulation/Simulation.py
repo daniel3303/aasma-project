@@ -30,7 +30,7 @@ class Simulation:
         self.entities = []
         self.agents = []
         self.world = world
-        pass
+
 
     def addEntity(self, entity: Entity) -> Simulation:
         # prevents adding the same entity multiple times
@@ -159,6 +159,15 @@ class Simulation:
 
         return self
 
+    def outputToConsole(self) -> Simulation:
+        from src.Entity.Salesman import Salesman
+        string = "\r| "
+        for entity in self.entities:
+            if isinstance(entity, Salesman):
+                string += entity.getName()+(": {0:.3f}".format(entity.getTotalReward())) +  " | "
+        print(string, end="")
+        return self
+
 
     # Returns the height of the world
     def getWorldHeight(self) -> int:
@@ -174,5 +183,3 @@ class Simulation:
 
     def getTileHeight(self) -> float:
         return self.world.getTileHeight()
-
-

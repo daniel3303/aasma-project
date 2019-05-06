@@ -32,6 +32,8 @@ class Salesman(Entity):
     actionSell: bool
     actionSellTo: 'Consumer'
 
+    name: str
+
 
     def __init__(self, simulation: 'Simulation', position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
@@ -51,6 +53,9 @@ class Salesman(Entity):
 
         self.setImage(AssetManager.getAsset("salesman"))
         self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
+
+        # A name for this entity
+        self.name = "Salesman"
 
     def update(self):
         super().update() #does nothing
@@ -164,4 +169,13 @@ class Salesman(Entity):
                 salesmen.append(entity)
 
         return salesmen
+
+    def getTotalReward(self) -> float:
+        return self.totalReward
+
+    def setName(self, name: str):
+        self.name = name
+
+    def getName(self) -> str:
+        return self.name
 
