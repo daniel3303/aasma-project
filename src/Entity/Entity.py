@@ -11,9 +11,12 @@ if TYPE_CHECKING:
 
 
 class Entity:
+    ID = 0
     MAX_VELOCITY = 20
     VIEW_RANGE = 300
 
+    # unique entity identifier
+    id: int
     simulation: Simulation
     position: Vector2D
     velocity: Vector2D
@@ -27,6 +30,7 @@ class Entity:
     assetsLoaded: bool
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
+        self.id = Entity.ID = Entity.ID + 1 # entity unique ID
         self.active = True
         self.simulation = simulation
         self.position = position.copy()
@@ -38,6 +42,9 @@ class Entity:
         self.image = None
         self.viewRange = self.VIEW_RANGE
         self.entitiesNearBy = []
+
+    def getId(self) -> int:
+        return self.id
 
     def setImage(self, image):
         self.image = pygame.transform.scale(image, (self.getWidth(), self.getHeight()))

@@ -208,3 +208,6 @@ class Simulation:
 
     def getTileHeight(self) -> float:
         return self.world.getTileHeight()
+
+    def getEntities(self) -> [Entity]:
+        return self.entities.copy()

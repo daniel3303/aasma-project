@@ -172,6 +172,9 @@ class Salesman(Entity):
     def getTotalReward(self) -> float:
         return self.totalReward
 
+    def getCurrentReward(self) -> float:
+        return self.actionReward
+
     def setName(self, name: str):
         self.name = name
 

@@ -10,10 +10,12 @@ from src.Entity.Salesman import Salesman
 
 
 class DeepLearningAgent(AbstractAgent):
+    nextAction: int
 
     def __init__(self, salesman: Salesman):
         super().__init__(salesman)
         salesman.setName("Deep Q Learning")
+        self.nextAction = 0
 
     # Decides which action to take next
 
@@ -32,13 +34,47 @@ class DeepLearningAgent(AbstractAgent):
     #   getLastReward
 
     def decide(self):
-        #input
+        salesman = self.salesman
 
-        #self position
-        #position of each nearby agent
-        #type of nearby agent 0 or 1
+        if self.nextAction == 0:
+            salesman.moveRight()
+        elif self.nextAction == 1:
+            salesman.moveDown()
+        elif self.nextAction == 2:
+            salesman.moveLeft()
+        elif self.nextAction == 3:
+            salesman.moveUp()
+        elif self.nextAction == 4:
+            salesman.sell()
+        else:
+            print("ERROR: INVALID ACTION")
 
-        pass
+    def setNextAction(self, action: int) -> None:
+        self.nextAction = action
+
+
+    def getCurrentReward(self) -> float:
+        return self.salesman.actionReward
+
+
+    def getCurrentObservation(self):
+        salesman = self.salesman
+        entities = self.salesman.getSimulation().getEntities()
+
+        # entities ordered by index
+        entities = sorted(entities, key=lambda entity: entity.getId())
+
+        observation = []
+
+        # self position
+        observation += [salesman.getX(), salesman.getY()]
+
+        # other entities position
+        for entity in entities:
+            observation += [entity.getX(), entity.getX()]
+
+        return observation
+
 
 
 
@@ -97,7 +133,7 @@ class DQN:
 
         selected_action_values = tf.reduce_sum(
             Y_hat * tf.one_hot(self.actions, K),
-            reduction_indices=[1]
+            axis=[1]
         )
 
         cost = tf.reduce_sum(tf.square(self.G - selected_action_values))
@@ -107,6 +143,7 @@ class DQN:
         # self.train_op = tf.train.GradientDescentOptimizer(1e-4).minimize(cost)
 
         # create replay memory
+        # state, action, reward, nextState, lastEpisodeState
         self.experience = {'s': [], 'a': [], 'r': [], 's2': [], 'done': []}
         self.max_experiences = max_experiences
         self.min_experiences = min_experiences
@@ -178,70 +215,3 @@ class DQN:
         else:
             X = np.atleast_2d(x)
             return np.argmax(self.predict(X)[0])
-
-
-def play_one(env, model, tmodel, eps, gamma, copy_period):
-    observation = env.reset()
-    done = False
-    totalreward = 0
-    iters = 0
-    while not done and iters < 2000:
-        # if we reach 2000, just quit, don't want this going forever
-        # the 200 limit seems a bit early
-        action = model.sample_action(observation, eps)
-        prev_observation = observation
-        observation, reward, done, info = env.step(action)
-
-        totalreward += reward
-        if done:
-            reward = -200
-
-        # update the model
-        model.add_experience(prev_observation, action, reward, observation, done)
-        model.train(tmodel)
-
-        iters += 1
-
-        if iters % copy_period == 0:
-            tmodel.copy_from(model)
-
-    return totalreward
-
-
-def main():
-    env = gym.make('CartPole-v0')
-    gamma = 0.99
-    copy_period = 50
-
-    D = len(env.observation_space.sample())
-    K = env.action_space.n
-    sizes = [200, 200]
-    model = DQN(D, K, sizes, gamma)
-    tmodel = DQN(D, K, sizes, gamma)
-    init = tf.global_variables_initializer()
-    session = tf.InteractiveSession()
-    session.run(init)
-    model.set_session(session)
-    tmodel.set_session(session)
-
-    N = 500
-    totalrewards = np.empty(N)
-    costs = np.empty(N)
-    for n in range(N):
-        eps = 1.0 / np.sqrt(n + 1)
-        totalreward = play_one(env, model, tmodel, eps, gamma, copy_period)
-        totalrewards[n] = totalreward
-        if n % 100 == 0:
-            print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
-                  totalrewards[max(0, n - 100):(n + 1)].mean())
-
-    print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
-    print("total steps:", totalrewards.sum())
-
-    plt.plot(totalrewards)
-    plt.title("Rewards")
-    plt.show()
-
-
-if __name__ == '__main__':
-    main()
