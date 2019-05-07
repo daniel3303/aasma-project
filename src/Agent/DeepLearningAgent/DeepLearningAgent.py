@@ -11,11 +11,31 @@ from src.Entity.Salesman import Salesman
 
 class DeepLearningAgent(AbstractAgent):
     nextAction: int
+    modelPath: str
+    training: bool
 
-    def __init__(self, salesman: Salesman):
+    def __init__(self, salesman: Salesman, model=None):
         super().__init__(salesman)
         salesman.setName("Deep Q Learning")
         self.nextAction = 0
+        self.modelPath = model
+        self.training = True
+
+        if self.modelPath:
+            self.training = False
+            gamma = 0.99
+            D = 30  # fix me make it dynamic
+            K = 5  # fix me make it dynamic
+
+            sizes = [200, 200]
+            self.model = model = DQN(D, K, sizes, gamma)
+            tmodel = DQN(D, K, sizes, gamma)
+            session = tf.InteractiveSession()
+            saver = tf.train.Saver()
+            saver.restore(session, self.modelPath)
+            model.set_session(session)
+            tmodel.set_session(session)
+
 
     # Decides which action to take next
 
@@ -35,6 +55,10 @@ class DeepLearningAgent(AbstractAgent):
 
     def decide(self):
         salesman = self.salesman
+
+
+        if self.modelPath:
+            self.nextAction = self.model.sample_action(self.getCurrentObservation(), 0)
 
         if self.nextAction == 0:
             salesman.moveRight()

@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import sys
 
 from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN
 from src.Agent.Reactive.ReactiveAgent import ReactiveAgent
@@ -86,6 +87,14 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
+    modelPath = None
+
+
+    if "--model" in sys.argv:
+        modelPath = sys.argv[2]
+        print(modelPath)
+
+
     gamma = 0.99
     copy_period = 50
 
@@ -95,11 +104,18 @@ def main():
     sizes = [200, 200]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
-    init = tf.global_variables_initializer()
     session = tf.InteractiveSession()
-    session.run(init)
+
+    if modelPath is None:
+        init = tf.global_variables_initializer()
+        session.run(init)
+    else:
+        saver = tf.train.Saver()
+        saver.restore(session, modelPath)
+
     model.set_session(session)
     tmodel.set_session(session)
+    saver = tf.train.Saver()
 
     N = 500
     totalrewards = np.empty(N)
@@ -110,6 +126,8 @@ def main():
         if n % 1 == 0:
             print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
+            save_path = saver.save(session, "models/8consumers_1reactive_1deep/model.ckpt")
+            print("Model saved in %s" % save_path)
 
     print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
     print("total steps:", totalrewards.sum())
