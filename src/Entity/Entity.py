@@ -24,6 +24,7 @@ class Entity:
     entitiesNearBy: [Entity]
     maxVelocity: float
     active: bool
+    assetsLoaded: bool
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         self.active = True
@@ -33,6 +34,7 @@ class Entity:
         self.velocity = Vector2D(0,0)
         self.maxVelocity = Entity.MAX_VELOCITY
 
+        self.assetsLoaded = False
         self.image = None
         self.viewRange = self.VIEW_RANGE
         self.entitiesNearBy = []
@@ -114,7 +116,14 @@ class Entity:
         self.position.sum(self.velocity)
         return self
 
+    def loadAssets(self) -> None:
+        pass
+
     def draw(self, screen) -> Entity:
+        if not self.assetsLoaded:
+            self.loadAssets()
+            self.assetsLoaded = True
+
         if(self.image != None):
             screen.blit(self.image, (self.getX(), self.getY()))
         else:

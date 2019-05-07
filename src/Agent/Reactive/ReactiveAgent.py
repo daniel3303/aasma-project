@@ -50,10 +50,8 @@ class ReactiveAgent(AbstractAgent):
             salesman.moveRight()
 
         # Always tries to sell to someone
-        consumersNearBy = salesman.getNearbyConsumers()
-        if consumersNearBy != []:
-            consumer = random.choice(consumersNearBy)
-            salesman.sellTo(consumer)
+        salesman.sell()
+
 
         # Updates the moving direction
         if self.walkCounter <= 0:

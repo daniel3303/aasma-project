@@ -20,12 +20,14 @@ class HotSpot(Entity):
 
     def __init__(self, simulation: 'Simulation', position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
-        self.setImage(AssetManager.getAsset("hotspot"))
         self.setVelocity(Vector2D(0,0))
 
         self.setActive(random.randint(0, 1) == 1)
         self.showSteps = random.randint(self.MIN_SHOW_TIME, self.MAX_SHOW_TIME)
         self.hideSteps = random.randint(self.MIN_HIDE_TIME, self.MAX_HIDE_TIME)
+
+    def loadAssets(self) -> None:
+        self.setImage(AssetManager.getAsset("hotspot"))
 
 
     def update(self):

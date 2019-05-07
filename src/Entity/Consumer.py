@@ -23,10 +23,12 @@ class Consumer(Entity):
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
-        self.setImage(AssetManager.getAsset("consumer"))
         self.wantsToBuy = False
         self.nextWantToBuyCheck = int(round(time.time() * 1000))
         self.setWalker(RandomWalker())
+
+    def loadAssets(self) -> None:
+        self.setImage(AssetManager.getAsset("consumer"))
 
     def setWalker(self, walker: Walker) -> 'Consumer':
         self.walker = walker

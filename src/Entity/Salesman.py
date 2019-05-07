@@ -44,25 +44,25 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
-        self.actionSellTo = None
 
         self.totalReward = 0.0
         self.actionReward = 0.0
         self.numSales = 0
         self.sales = []
 
-        self.setImage(AssetManager.getAsset("salesman"))
-        self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
-
         # A name for this entity
         self.name = "Salesman"
+
+    def loadAssets(self) -> None:
+        self.setImage(AssetManager.getAsset("salesman"))
+        self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
 
     def update(self):
         super().update() #does nothing
         self.actionReward = 0
 
         if self.actionSell:
-            self.simulation.sell(self, self.actionSellTo)
+            self.simulation.sell(self)
 
         if self.actionMoveUp:
             self.getVelocity().setX(0)
@@ -110,7 +110,6 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
-        self.actionSellTo = None
 
     #### AVAILABLE ACTIONS ####
     def doNothing(self) -> None:
@@ -128,9 +127,9 @@ class Salesman(Entity):
     def moveRight(self) -> None:
         self.actionMoveRight = True
 
-    def sellTo(self, consumer: 'Consumer') -> None:
+    # Tries to sell to the closest consumer
+    def sell(self) -> None:
         self.actionSell = True
-        self.actionSellTo = consumer
 
 
     ### AVAILABLE SENSORS ###

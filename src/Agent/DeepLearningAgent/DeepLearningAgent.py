@@ -9,10 +9,11 @@ from src.Agent.AbstractAgent import AbstractAgent
 from src.Entity.Salesman import Salesman
 
 
-class ReactiveAgent(AbstractAgent):
+class DeepLearningAgent(AbstractAgent):
 
     def __init__(self, salesman: Salesman):
         super().__init__(salesman)
+        salesman.setName("Deep Q Learning")
 
     # Decides which action to take next
 
@@ -31,6 +32,12 @@ class ReactiveAgent(AbstractAgent):
     #   getLastReward
 
     def decide(self):
+        #input
+
+        #self position
+        #position of each nearby agent
+        #type of nearby agent 0 or 1
+
         pass
 
 

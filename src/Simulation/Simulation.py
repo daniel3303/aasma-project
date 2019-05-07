@@ -75,13 +75,38 @@ class Simulation:
                         viewableEntities.append(target)
             entity.setEntitiesNearBy(viewableEntities)
 
-    def sell(self, seller: Salesman, buyer: Consumer):
+    # Tries to sell to the closest consumer
+    def sell(self, seller: Salesman):
+        buyer = self.getClosestConsumerInView(seller)
+
+        # No buyer
+        if buyer is None:
+            return
+
         if(self.distanceBetween(seller, buyer) <= self.MAX_DISTANCE_TO_ALLOW_SELL):
             wantsToBuy = buyer.buy(seller)
             if(wantsToBuy):
                 seller.onSuccessSale(buyer)
             else:
                 seller.onFailedSale(buyer)
+
+    def getClosestConsumerInView(self, entity: Entity) -> Consumer:
+        from src.Entity.Consumer import Consumer
+        consumers = []
+        for entity in self.entities:
+            if isinstance(entity, Consumer):
+                consumers.append(entity)
+
+        minDistance = float("INF")
+        closestConsumer = None
+        for consumer in consumers:
+            distance = self.distanceBetween(consumer, entity)
+            if(distance < minDistance):
+                closestConsumer = consumer
+                minDistance = distance
+        return closestConsumer
+
+
 
 
     # Checks whenever entity A can see entity B in the map
