@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from src.Entity.Salesman import Salesman
 
 class Consumer(Entity):
-    MIN_TIME_BETWEEN_SELLS = 10 #secs
+    MIN_TIME_BETWEEN_SELLS = 5 #secs
 
     wantsToBuy: bool
     nextWantToBuyCheck: int

@@ -21,20 +21,34 @@ class DeepLearningAgent(AbstractAgent):
         self.nextAction = 0
         self.modelName = model
         self.training = True
+        #self.salesman.totalReward = -1000
 
         if self.modelName:
             self.training = False
             gamma = 0.99
-            D = 38  # fix me make it dynamic
+            D = 8  # fix me make it dynamic
             K = 5  # fix me make it dynamic
 
-            sizes = [200, 300, 200]
+            sizes = [512, 512]
             self.model = model = DQN(D, K, sizes, gamma)
             session = tf.InteractiveSession()
             init = tf.global_variables_initializer()
             session.run(init)
             model.set_session(session)
             load_modal(session, model, self.modelName)
+
+            #print parameters
+            #params = model.params
+            #actual = []
+            #for p in params:
+                #v = session.run(p)
+                #actual.append(v)
+            #print("loaded parameters")
+            #print(actual)
+
+            #predict for 0 (testing)
+            #print("Action for 0 state")
+            #print(model.predict(np.zeros((1,8))))
 
 
     # Decides which action to take next
@@ -58,7 +72,7 @@ class DeepLearningAgent(AbstractAgent):
 
 
         if self.modelName:
-            self.nextAction = self.model.sample_action(self.getCurrentObservation(), 0.1)
+            self.nextAction = self.model.sample_action(self.getCurrentObservation(), 0)
 
 
         if self.nextAction == 0:
@@ -74,7 +88,7 @@ class DeepLearningAgent(AbstractAgent):
         else:
             print("ERROR: INVALID ACTION")
 
-        print("pos:"+str(salesman.getX())+","+str(salesman.getY())+" action: "+self.getCurrentActionName(), end="")
+        print("sales: "+str(salesman.numSales)+" pos:"+str(salesman.getX())+","+str(salesman.getY())+" action: "+self.getCurrentActionName(), end="")
 
     def setNextAction(self, action: int) -> None:
         self.nextAction = action
@@ -110,9 +124,8 @@ class DeepLearningAgent(AbstractAgent):
 
         # other entities position
         for entity in entities:
-            observation += [entity.getX(), entity.getX()]
             if isinstance(entity, Consumer):
-                observation += [float(entity.getWasRecentlyAskedToBuy())]
+                observation += [entity.getX(), entity.getX(), float(entity.getWasRecentlyAskedToBuy())]
 
         return observation
 
@@ -122,13 +135,19 @@ class DeepLearningAgent(AbstractAgent):
 
 # A version of HiddenLayer that keeps track of params
 class HiddenLayer:
-    def __init__(self, M1, M2, f=tf.nn.leaky_relu, use_bias=True):
+    def __init__(self, M1, M2, f=tf.nn.tanh, use_bias=True):
         self.W = tf.Variable(tf.random_normal(shape=(M1, M2)))
+        self.W_other = tf.placeholder(dtype=tf.float32, shape=(M1, M2))
+
+        self.copy_W_op = self.W.assign(self.W_other)
         self.params = [self.W]
+
         self.use_bias = use_bias
         if use_bias:
             self.b = tf.Variable(np.zeros(M2).astype(np.float32))
+            self.b_other = tf.placeholder(dtype=tf.float32, shape=(M2))
             self.params.append(self.b)
+            self.copy_b_op = self.b.assign(self.b_other)
         self.f = f
 
     def forward(self, X):
@@ -138,21 +157,23 @@ class HiddenLayer:
             a = tf.matmul(X, self.W)
         return self.f(a)
 
+    def copy_from(self, peer: 'HiddenLayer', session):
+        peerW = session.run(peer.W)
+        peerb = session.run(peer.b)
+        session.run(self.copy_W_op, feed_dict={self.W_other: peerW})
+        session.run(self.copy_b_op, feed_dict={self.b_other: peerb})
+
+
 
 class DQN:
-    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=6000, min_experiences=100, batch_sz=32):
+    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=1000, batch_sz=32):
         self.K = K
 
         # create the graph
         self.layers = []
 
-        # first layer linear
-        layer = HiddenLayer(D, hidden_layer_sizes[1])
-        self.layers.append(layer)
-        M1 = hidden_layer_sizes[1]
-
-
-        for M2 in hidden_layer_sizes[1:]:
+        M1 = D
+        for M2 in hidden_layer_sizes:
             layer = HiddenLayer(M1, M2)
             self.layers.append(layer)
             M1 = M2
@@ -183,10 +204,10 @@ class DQN:
             axis=[1]
         )
 
-        cost = tf.reduce_sum(tf.square(self.G - selected_action_values))
-        self.train_op = tf.train.AdamOptimizer(1e-2).minimize(cost)
+        self.cost = tf.reduce_sum(tf.square(self.G - selected_action_values))
+        self.train_op = tf.train.AdamOptimizer(1e-2).minimize(self.cost)
         # self.train_op = tf.train.AdagradOptimizer(1e-2).minimize(cost)
-        # self.train_op = tf.train.MomentumOptimizer(1e-3, momentum=0.9).minimize(cost)
+        #self.train_op = tf.train.MomentumOptimizer(1e-3, momentum=0.9).minimize(self.cost)
         # self.train_op = tf.train.GradientDescentOptimizer(1e-4).minimize(cost)
 
         # create replay memory
@@ -197,20 +218,13 @@ class DQN:
         self.batch_sz = batch_sz
         self.gamma = gamma
 
+
     def set_session(self, session):
         self.session = session
 
     def copy_from(self, other):
-        # collect all the ops
-        ops = []
-        my_params = self.params
-        other_params = other.params
-        for p, q in zip(my_params, other_params):
-            actual = self.session.run(q)
-            op = p.assign(actual)
-            ops.append(op)
-        # now run them all
-        self.session.run(ops)
+        for sl, pl in zip(self.layers, other.layers):
+            sl.copy_from(pl, self.session)
 
     def predict(self, X):
         X = np.atleast_2d(X)
@@ -234,14 +248,18 @@ class DQN:
         targets = [r + self.gamma * next_q if not done else r for r, next_q, done in zip(rewards, next_Q, dones)]
 
         # call optimizer
-        self.session.run(
-            self.train_op,
+        cost, _ = self.session.run(
+            [self.cost,
+            self.train_op],
             feed_dict={
                 self.X: states,
                 self.G: targets,
                 self.actions: actions
             }
         )
+
+        print("cost: {0:.2f} ".format(cost) + " ", end="")
+
 
     def add_experience(self, s, a, r, s2, done):
         if len(self.experience['s']) >= self.max_experiences:
