@@ -32,10 +32,9 @@ hotspot = HotSpot(simulation, Vector2D(300,300), Vector2D(25,25))
 simulation.addEntity(hotspot)
 
 
-for i in range(0,8):
-    consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25,25))
+for i in range(0, 8):
+    consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25, 25))
     simulation.addEntity(consumer)
-
 
 # Reactive agent
 salesman = Salesman(simulation, Vector2D(200, 100), Vector2D(25, 25))
@@ -45,9 +44,10 @@ simulation.addAgent(agent)
 
 # Deep Q Learning Agent
 salesman = Salesman(simulation, Vector2D(200, 100), Vector2D(25, 25))
-agent = DeepLearningAgent(salesman, model="models/8consumers_1reactive_1deep/model.ckpt")
+agent = DeepLearningAgent(salesman, model="reactive_vs_deep")
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
+
 
 while True:
     for event in pygame.event.get():

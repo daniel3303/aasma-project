@@ -1,8 +1,9 @@
 import tensorflow as tf
 import numpy as np
 import sys
+import os
 
-from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN
+from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN, save_model, load_modal
 from src.Agent.Reactive.ReactiveAgent import ReactiveAgent
 from src.Entity.Consumer import Consumer
 from src.Entity.HotSpot import HotSpot
@@ -11,7 +12,7 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 500
+MAX_EPISODE_SIZE = 2000
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
@@ -75,7 +76,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         totalreward += reward
 
         # update the model
-        model.add_experience(prev_observation, action, reward, observation, False)
+        model.add_experience(prev_observation, action, reward, observation, (iters == MAX_EPISODE_SIZE-1))
         model.train(tmodel)
 
         iters += 1
@@ -87,37 +88,37 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    modelPath = None
+    loadModel = False
 
 
     if "--model" in sys.argv:
-        modelPath = sys.argv[2]
-        print(modelPath)
+        modelName = sys.argv[2]
+        if os.path.isfile("models/" + modelName + ".npy"):
+            loadModel = True
+    else:
+        raise ValueError("Provide a model name with --model")
 
 
     gamma = 0.99
     copy_period = 50
 
-    D = 30 #fix me make it dynamic
+    D = 38 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [200, 200]
+    sizes = [200, 300, 200]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
+    init = tf.global_variables_initializer()
+    session.run(init)
 
-    if modelPath is None:
-        init = tf.global_variables_initializer()
-        session.run(init)
-    else:
-        saver = tf.train.Saver()
-        saver.restore(session, modelPath)
+    if loadModel:
+        load_modal(session, model, modelName)
 
     model.set_session(session)
     tmodel.set_session(session)
-    saver = tf.train.Saver()
 
-    N = 500
+    N = 2000
     totalrewards = np.empty(N)
     for n in range(N):
         eps = 1.0 / np.sqrt(n + 1)
@@ -126,15 +127,12 @@ def main():
         if n % 1 == 0:
             print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
-            save_path = saver.save(session, "models/8consumers_1reactive_1deep/model.ckpt")
-            print("Model saved in %s" % save_path)
+            save_model(session, model, modelName)
+            save_model(session, tmodel, modelName+"_target")
+            print("Model saved with name %s" % modelName)
 
     print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
     print("total steps:", totalrewards.sum())
-
-    #plt.plot(totalrewards)
-    #plt.title("Rewards")
-    #plt.show()
 
 
 if __name__ == '__main__':

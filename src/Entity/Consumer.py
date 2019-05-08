@@ -64,5 +64,11 @@ class Consumer(Entity):
         else:
             return False
 
+    def getWasRecentlyAskedToBuy(self) -> bool:
+        currentTime = int(round(time.time() * 1000))
+
+        if (currentTime - self.nextWantToBuyCheck > 0):
+            return False
+        return True
 
 

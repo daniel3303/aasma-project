@@ -14,15 +14,17 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 1
-    SELL_FAILED_REWARD = -0.03
-    MOVING_REWARD = -0.005
-    NOT_MOVING_REWARD = -0.001
+    SELL_SUCCESSED_REWARD = 3
+    SELL_FAILED_REWARD = -0.010
+    MOVING_REWARD = -0.001
+    DO_NOTHING_REWARD = -0.005
+    NOT_MOVING_REWARD = -0.0125
 
     sales: ['Consumer']
     totalReward: float
     actionReward: float
     numSales: int
+    lastPosition: Vector2D
 
 
     actionMoveUp: bool
@@ -44,6 +46,7 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
+        self.lastPosition = Vector2D(0,0)
 
         self.totalReward = 0.0
         self.actionReward = 0.0
@@ -81,7 +84,13 @@ class Salesman(Entity):
             self.getVelocity().setY(0)
             self.actionReward += self.MOVING_REWARD
         else:
+            self.actionReward += self.DO_NOTHING_REWARD
+
+
+        # if did not move or moved tried to move against a wall
+        if self.getPosition().equals(self.lastPosition):
             self.actionReward += self.NOT_MOVING_REWARD
+        self.lastPosition = self.getPosition().copy()
 
         # Updated the total reward based on the outcome of the last decisions
         self.totalReward += self.actionReward

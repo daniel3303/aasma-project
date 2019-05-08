@@ -7,34 +7,34 @@ from datetime import datetime
 
 from src.Agent.AbstractAgent import AbstractAgent
 from src.Entity.Salesman import Salesman
+from src.Entity.Consumer import Consumer
 
 
 class DeepLearningAgent(AbstractAgent):
     nextAction: int
-    modelPath: str
+    modelName: str
     training: bool
 
     def __init__(self, salesman: Salesman, model=None):
         super().__init__(salesman)
         salesman.setName("Deep Q Learning")
         self.nextAction = 0
-        self.modelPath = model
+        self.modelName = model
         self.training = True
 
-        if self.modelPath:
+        if self.modelName:
             self.training = False
             gamma = 0.99
-            D = 30  # fix me make it dynamic
+            D = 38  # fix me make it dynamic
             K = 5  # fix me make it dynamic
 
-            sizes = [200, 200]
+            sizes = [200, 300, 200]
             self.model = model = DQN(D, K, sizes, gamma)
-            tmodel = DQN(D, K, sizes, gamma)
             session = tf.InteractiveSession()
-            saver = tf.train.Saver()
-            saver.restore(session, self.modelPath)
+            init = tf.global_variables_initializer()
+            session.run(init)
             model.set_session(session)
-            tmodel.set_session(session)
+            load_modal(session, model, self.modelName)
 
 
     # Decides which action to take next
@@ -57,8 +57,9 @@ class DeepLearningAgent(AbstractAgent):
         salesman = self.salesman
 
 
-        if self.modelPath:
-            self.nextAction = self.model.sample_action(self.getCurrentObservation(), 0)
+        if self.modelName:
+            self.nextAction = self.model.sample_action(self.getCurrentObservation(), 0.1)
+
 
         if self.nextAction == 0:
             salesman.moveRight()
@@ -73,12 +74,26 @@ class DeepLearningAgent(AbstractAgent):
         else:
             print("ERROR: INVALID ACTION")
 
+        print("pos:"+str(salesman.getX())+","+str(salesman.getY())+" action: "+self.getCurrentActionName(), end="")
+
     def setNextAction(self, action: int) -> None:
         self.nextAction = action
 
 
     def getCurrentReward(self) -> float:
         return self.salesman.actionReward
+
+    def getCurrentActionName(self) -> str:
+        if self.nextAction == 0:
+            return "right   "
+        elif self.nextAction == 1:
+            return  "down   "
+        elif self.nextAction == 2:
+            return "left    "
+        elif self.nextAction == 3:
+            return "up      "
+        elif self.nextAction == 4:
+            return "sell    "
 
 
     def getCurrentObservation(self):
@@ -96,6 +111,8 @@ class DeepLearningAgent(AbstractAgent):
         # other entities position
         for entity in entities:
             observation += [entity.getX(), entity.getX()]
+            if isinstance(entity, Consumer):
+                observation += [float(entity.getWasRecentlyAskedToBuy())]
 
         return observation
 
@@ -105,7 +122,7 @@ class DeepLearningAgent(AbstractAgent):
 
 # A version of HiddenLayer that keeps track of params
 class HiddenLayer:
-    def __init__(self, M1, M2, f=tf.nn.tanh, use_bias=True):
+    def __init__(self, M1, M2, f=tf.nn.leaky_relu, use_bias=True):
         self.W = tf.Variable(tf.random_normal(shape=(M1, M2)))
         self.params = [self.W]
         self.use_bias = use_bias
@@ -123,18 +140,24 @@ class HiddenLayer:
 
 
 class DQN:
-    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=10000, min_experiences=100, batch_sz=32):
+    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=6000, min_experiences=100, batch_sz=32):
         self.K = K
 
         # create the graph
         self.layers = []
-        M1 = D
-        for M2 in hidden_layer_sizes:
+
+        # first layer linear
+        layer = HiddenLayer(D, hidden_layer_sizes[1])
+        self.layers.append(layer)
+        M1 = hidden_layer_sizes[1]
+
+
+        for M2 in hidden_layer_sizes[1:]:
             layer = HiddenLayer(M1, M2)
             self.layers.append(layer)
             M1 = M2
 
-        # final layer
+        # final layer linear
         layer = HiddenLayer(M1, K, lambda x: x)
         self.layers.append(layer)
 
@@ -239,3 +262,29 @@ class DQN:
         else:
             X = np.atleast_2d(x)
             return np.argmax(self.predict(X)[0])
+
+
+def save_model(session, model, modelName):
+    file = "models/"+modelName+".npy"
+    params = model.params
+    actual = []
+    for p in params:
+        v = session.run(p)
+        actual.append(v)
+    np.save(file, actual)
+
+
+def load_modal(session, model, modelName):
+    file = "models/" + modelName + ".npy"
+    savedParams = np.load(file, allow_pickle=True)
+    myParams = model.params
+    ops = []
+    for m, s in zip(myParams, savedParams):
+        op = m.assign(s)
+        ops.append(op)
+    # now run them all
+    session.run(ops)
+
+
+
+
