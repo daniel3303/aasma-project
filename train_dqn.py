@@ -94,7 +94,7 @@ def main():
     D = 26 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [64, 64]
+    sizes = [256, 256]
     model = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
     init = tf.global_variables_initializer()
