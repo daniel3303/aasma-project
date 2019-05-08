@@ -12,7 +12,7 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 100000
+MAX_EPISODE_SIZE = 2000
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
@@ -105,7 +105,7 @@ def main():
     N = 2000
     totalrewards = np.empty(N)
     for n in range(N):
-        eps = 0.2 / np.sqrt(n + 1)
+        eps = 1 / np.sqrt(n + 1)
         totalreward = play_one(model, eps, gamma)
         totalrewards[n] = totalreward
 
