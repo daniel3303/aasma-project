@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import sys
 import os
-import time
 
 from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN, save_model, load_modal
 from src.Agent.Reactive.ReactiveAgent import ReactiveAgent
@@ -41,7 +40,7 @@ def create_simulation_with_consumers() -> Simulation:
 
 
 
-def play_one(model, tmodel, eps, gamma, copy_period):
+def play_one(model, eps, gamma):
     simulation = create_simulation_with_consumers()
 
     # Reactive agent
@@ -81,69 +80,37 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         if iters == MAX_EPISODE_SIZE - 1:
             done = True
         model.add_experience(prev_observation, action, reward, observation, done)
-        model.train(tmodel)
+        model.train()
 
         print(" iter: "+str(iters)+"/"+str(MAX_EPISODE_SIZE)+" ", end="")
 
         iters += 1
 
-        if iters % copy_period == 0:
-            tmodel.copy_from(model)
-
     return totalreward
 
 
 def main():
-    loadModel = False
-
-
-    if "--model" in sys.argv:
-        modelName = sys.argv[2]
-        if os.path.isfile("models/" + modelName + ".npy"):
-            loadModel = True
-    else:
-        raise ValueError("Provide a model name with --model")
-
-
     gamma = 0.99
-    copy_period = 50
-
     D = 26 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [512, 512]
+    sizes = [64, 64]
     model = DQN(D, K, sizes, gamma)
-    tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
     init = tf.global_variables_initializer()
     session.run(init)
 
-
-    if loadModel:
-        load_modal(session, model, modelName)
-        load_modal(session, tmodel, modelName+"_target")
-
     model.set_session(session)
-    tmodel.set_session(session)
 
     N = 2000
     totalrewards = np.empty(N)
     for n in range(N):
-        eps = 1.0 / np.sqrt(n + 1)
-        totalreward = play_one(model, tmodel, eps, gamma, copy_period)
+        eps = 0.2 / np.sqrt(n + 1)
+        totalreward = play_one(model, eps, gamma)
         totalrewards[n] = totalreward
 
-        if n % 1 == 0:
-            print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
+        print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
-            save_model(session, model, modelName)
-            save_model(session, tmodel, modelName+"_target")
-            print("Model saved with name %s" % modelName)
-
-
-    print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
-    print("total steps:", totalrewards.sum())
-
 
 if __name__ == '__main__':
     main()

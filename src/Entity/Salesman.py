@@ -14,11 +14,17 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 3
+    """SELL_SUCCESSED_REWARD = 3
     SELL_FAILED_REWARD = -0.010
     MOVING_REWARD = -0.001
     DO_NOTHING_REWARD = -0.005
-    NOT_MOVING_REWARD = -0.0125
+    NOT_MOVING_REWARD = -0.0125"""
+
+    SELL_SUCCESSED_REWARD = -3
+    SELL_FAILED_REWARD = 0.010
+    MOVING_REWARD = 0.001
+    DO_NOTHING_REWARD = 0.005
+    NOT_MOVING_REWARD = 0.0125
 
     sales: ['Consumer']
     totalReward: float
