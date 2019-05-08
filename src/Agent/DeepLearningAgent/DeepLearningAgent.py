@@ -103,7 +103,7 @@ class HiddenLayer:
 
 
 class DQN:
-    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=10, batch_sz=2):
+    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=500, batch_sz=32):
         # input nodes
         self.D = D
 
