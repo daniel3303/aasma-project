@@ -71,10 +71,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         totalreward += reward
 
         # update the model
-        done = False
-        if iters == MAX_EPISODE_SIZE - 1:
-            done = True
-        model.add_experience(prev_observation, action, reward, observation, done)
+        model.add_experience(prev_observation, action, reward, observation)
         model.train(tmodel)
 
 

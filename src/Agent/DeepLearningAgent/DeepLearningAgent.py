@@ -182,7 +182,7 @@ class DQN:
 
         # create replay memory
         # state, action, reward, nextState, lastEpisodeState
-        self.experience = {'s': [], 'a': [], 'r': [], 's2': [], 'done': []}
+        self.experience = {'s': [], 'a': [], 'r': [], 's2': []}
         self.max_experiences = max_experiences
         self.min_experiences = min_experiences
         self.batch_sz = batch_sz
@@ -212,9 +212,8 @@ class DQN:
         actions = [self.experience['a'][i] for i in idx]
         rewards = [self.experience['r'][i] for i in idx]
         next_states = [self.experience['s2'][i] for i in idx]
-        dones = [self.experience['done'][i] for i in idx]
         next_Q = np.max(target_network.predict(next_states), axis=1)
-        targets = [r + self.gamma * next_q if not done else r for r, next_q, done in zip(rewards, next_Q, dones)]
+        targets = [r + self.gamma * next_q for r, next_q in zip(rewards, next_Q)]
 
         """print("IN TRAIN")
         print("states: "+str(states))
@@ -239,18 +238,16 @@ class DQN:
         print("cost: {0:08.2f} ".format(np.sum(cost)) + " ", end="")
 
 
-    def add_experience(self, s, a, r, s2, done):
+    def add_experience(self, s, a, r, s2):
         if len(self.experience['s']) >= self.max_experiences:
             self.experience['s'].pop(0)
             self.experience['a'].pop(0)
             self.experience['r'].pop(0)
             self.experience['s2'].pop(0)
-            self.experience['done'].pop(0)
         self.experience['s'].append(s)
         self.experience['a'].append(a)
         self.experience['r'].append(r)
         self.experience['s2'].append(s2)
-        self.experience['done'].append(done)
 
     def printExperience(self):
         for ind in range(len(self.experience["s"])-10, len(self.experience["s"])):
