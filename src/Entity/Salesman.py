@@ -14,11 +14,17 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 1
-    SELL_FAILED_REWARD = -0.05
-    MOVING_REWARD = -0.03
+    SELL_SUCCESSED_REWARD = 4
+    SELL_FAILED_REWARD = -0.1
+    MOVING_REWARD = 0
     DO_NOTHING_REWARD = 0
     NOT_MOVING_REWARD = -0.1
+
+    """SELL_SUCCESSED_REWARD = -10
+    SELL_FAILED_REWARD = -10
+    MOVING_REWARD = 1
+    DO_NOTHING_REWARD = 0
+    NOT_MOVING_REWARD = -1"""
 
     sales: ['Consumer']
     totalReward: float
@@ -66,10 +72,6 @@ class Salesman(Entity):
 
         if self.actionSell:
             self.simulation.sell(self)
-
-        #print("SALESMAN")
-
-        #print("POS BEFORE: "+str(self.position.getX())+"|"+str(self.position.getY()))
 
         if self.actionMoveUp:
             self.getVelocity().setX(0)

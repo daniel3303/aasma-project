@@ -74,6 +74,14 @@ class DeepLearningAgent(AbstractAgent):
         elif self.nextAction == 4:
             return "sell    "
 
+        """
+        1   1   0   0   0
+        0   1   1   0   0
+        1   0   0   1   0
+        0   0   1   1   0
+        
+        """
+
 
     def getCurrentObservation(self):
         salesman = self.salesman
@@ -88,9 +96,9 @@ class DeepLearningAgent(AbstractAgent):
         observation += [salesman.getX(), salesman.getY()]
 
         # other entities position
-        #for entity in entities:
-            #if isinstance(entity, Consumer):
-                #observation += [entity.getX(), entity.getX(), float(entity.getWasRecentlyAskedToBuy())]
+        for entity in entities:
+            if isinstance(entity, Consumer):
+                observation += [entity.getX(), entity.getX(), float(entity.getNumStepsSinceLastSellingAttempt())]
 
         return observation
 
@@ -126,7 +134,7 @@ class HiddenLayer:
 
 
 class DQN:
-    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=100, batch_sz=32):
+    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=100000, min_experiences=1000, batch_sz=512):
         self.K = K
 
         # create the graph
@@ -228,7 +236,7 @@ class DQN:
             }
         )
 
-        print("cost: {0:.2f} ".format(np.sum(cost)) + " ", end="")
+        print("cost: {0:08.2f} ".format(np.sum(cost)) + " ", end="")
 
 
     def add_experience(self, s, a, r, s2, done):
@@ -245,7 +253,7 @@ class DQN:
         self.experience['done'].append(done)
 
     def printExperience(self):
-        for ind in range(len(self.experience["s"])-20, len(self.experience["s"])):
+        for ind in range(len(self.experience["s"])-10, len(self.experience["s"])):
             print(str(self.experience["s"][ind]) + " | " + str(self.experience["a"][ind]) + " | " + str(self.experience["r"][ind]) + " | " + str(self.experience["s2"][ind]))
 
     def sample_action(self, x, eps):
@@ -262,8 +270,3 @@ class DQN:
 
         X = np.atleast_2d(x)
         print(target_nn.predict(X))
-
-
-
-
-

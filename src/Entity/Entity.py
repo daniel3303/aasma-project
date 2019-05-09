@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Entity:
     ID = 0
-    MAX_VELOCITY = 20
+    MAX_VELOCITY = 10
     VIEW_RANGE = 300
 
     # unique entity identifier

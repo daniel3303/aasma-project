@@ -1,5 +1,4 @@
 import random
-import time
 from typing import TYPE_CHECKING
 
 from src.AssetManager import AssetManager
@@ -15,16 +14,16 @@ if TYPE_CHECKING:
     from src.Entity.Salesman import Salesman
 
 class Consumer(Entity):
-    MIN_TIME_BETWEEN_SELLS = 5 #secs
+    MIN_STEPS_BETWEEN_SELLS = 300 #10 seconds at 30fps
 
     wantsToBuy: bool
-    nextWantToBuyCheck: int
+    stepsSinceLastSellingAttempt: int
     walker: Walker
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
         self.wantsToBuy = False
-        self.nextWantToBuyCheck = int(round(time.time() * 1000))
+        self.stepsSinceLastSellingAttempt = 0
         self.setWalker(RandomWalker())
 
     def loadAssets(self) -> None:
@@ -47,28 +46,24 @@ class Consumer(Entity):
             self.setWalker(RandomWalker())
 
         self.walker.walk()
+        self.stepsSinceLastSellingAttempt += 1
 
     def getWalker(self) -> 'Walker':
         return self.walker
 
     def buy(self, seller: 'Salesman') -> bool:
-        currentTime = int(round(time.time() * 1000))
-
-        if(currentTime - self.nextWantToBuyCheck > 0):
+        if(self.stepsSinceLastSellingAttempt / Consumer.MIN_STEPS_BETWEEN_SELLS >= 1):
             self.wantsToBuy = random.random() >= 0.6
-            self.nextWantToBuyCheck = currentTime + self.MIN_TIME_BETWEEN_SELLS * 1000
+            self.stepsSinceLastSellingAttempt = 0
 
         if(self.wantsToBuy == True):
             self.wantsToBuy = False
+            self.stepsSinceLastSellingAttempt = 0
             return True
         else:
             return False
 
-    def getWasRecentlyAskedToBuy(self) -> bool:
-        currentTime = int(round(time.time() * 1000))
-
-        if (currentTime - self.nextWantToBuyCheck > 0):
-            return False
-        return True
+    def getNumStepsSinceLastSellingAttempt(self) -> int:
+        return self.stepsSinceLastSellingAttempt
 
 

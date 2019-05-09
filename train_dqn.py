@@ -13,27 +13,27 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 200
+MAX_EPISODE_SIZE = 2000
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
     simulation = Simulation(world)
 
-    hotspot = HotSpot(simulation, Vector2D(30,30), Vector2D(25,25))
+    hotspot = HotSpot(simulation, Vector2D(25, 25), Vector2D(25, 25))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(300,75), Vector2D(25,25))
+    hotspot = HotSpot(simulation, Vector2D(250, 75), Vector2D(25, 25))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(75,300), Vector2D(25,25))
+    hotspot = HotSpot(simulation, Vector2D(75, 300), Vector2D(25, 25))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(300,300), Vector2D(25,25))
+    hotspot = HotSpot(simulation, Vector2D(200, 200), Vector2D(25, 25))
     simulation.addEntity(hotspot)
 
 
-    for i in range(0,8):
-        consumer = Consumer(simulation, Vector2D(190, 30), Vector2D(25,25))
+    for i in range(0,6):
+        consumer = Consumer(simulation, Vector2D(25, 25), Vector2D(25,25))
         simulation.addEntity(consumer)
 
     return simulation
@@ -45,13 +45,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     simulation = create_simulation_with_consumers()
 
     # Reactive agent
-    #salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(25, 25))
-    #agent = ReactiveAgent(salesman)
-    #simulation.addEntity(salesman)
-    #simulation.addAgent(agent)
+    salesman = Salesman(simulation, Vector2D(25, 25), Vector2D(25, 25))
+    agent = ReactiveAgent(salesman)
+    simulation.addEntity(salesman)
+    simulation.addAgent(agent)
 
     # Deep Q Learning Agent
-    salesman = Salesman(simulation, Vector2D(0, 0), Vector2D(25, 25))
+    salesman = Salesman(simulation, Vector2D(25, 25), Vector2D(25, 25))
     agent = DeepLearningAgent(salesman)
     simulation.addEntity(salesman)
     simulation.addAgent(agent)
@@ -84,7 +84,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         model.add_experience(prev_observation, action, reward, observation, done)
         model.train(tmodel)
 
-        print(" iter: "+str(iters)+"/"+str(MAX_EPISODE_SIZE)+" ", end="")
+
 
         """print("\nPrev State: "+str(prev_observation))
         print("Action: "+str(action))
@@ -96,6 +96,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         #model.printExperience()
 
         iters += 1
+        print(" iter: " + str(iters) + "/" + str(MAX_EPISODE_SIZE) + " ", end="")
 
         if iters % copy_period == 0:
             tmodel.copy_from(model)
@@ -110,13 +111,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    gamma = 0.99
-    copy_period = 100
+    gamma = 0.95
+    copy_period = 50
 
-    D = 2 #fix me make it dynamic
+    D = 20 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [52]
+    sizes = [256, 128]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
@@ -126,10 +127,14 @@ def main():
     model.set_session(session)
     tmodel.set_session(session)
 
+    saver = tf.train.Saver()
+
     N = 2000
     totalrewards = np.empty(N)
     for n in range(N):
         eps = 1.0 / np.sqrt(n + 1)
+        if n % 5 == 0 and n > 0:
+            eps = 0
         totalreward = play_one(model, tmodel, eps, gamma, copy_period)
         totalrewards[n] = totalreward
 
@@ -137,6 +142,12 @@ def main():
             print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
 
+        if n % 50 == 0:
+            save_path = saver.save(session, "models/episode_"+str(n)+".ckpt")
+            print("Episode's model saved at "+save_path)
+
+    save_path = saver.save(session, "models/final_model.ckpt")
+    print("Final model saved at "+save_path)
 
     print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
     print("total steps:", totalrewards.sum())
