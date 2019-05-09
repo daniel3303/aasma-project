@@ -121,6 +121,7 @@ class Entity:
 
     def update(self) -> Entity:
         self.position.sum(self.velocity)
+        self.simulation.forceInBound(self)
         return self
 
     def loadAssets(self) -> None:

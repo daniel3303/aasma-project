@@ -14,11 +14,11 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 3
-    SELL_FAILED_REWARD = -0.010
-    MOVING_REWARD = -0.001
-    DO_NOTHING_REWARD = -0.005
-    NOT_MOVING_REWARD = -0.0125
+    SELL_SUCCESSED_REWARD = 0
+    SELL_FAILED_REWARD = 0
+    MOVING_REWARD = 0
+    DO_NOTHING_REWARD = 0
+    NOT_MOVING_REWARD = -1
 
     sales: ['Consumer']
     totalReward: float
@@ -61,11 +61,15 @@ class Salesman(Entity):
         self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
 
     def update(self):
-        super().update() #does nothing
+        self.lastPosition = self.getPosition().copy()
         self.actionReward = 0
 
         if self.actionSell:
             self.simulation.sell(self)
+
+        #print("SALESMAN")
+
+        #print("POS BEFORE: "+str(self.position.getX())+"|"+str(self.position.getY()))
 
         if self.actionMoveUp:
             self.getVelocity().setX(0)
@@ -87,10 +91,18 @@ class Salesman(Entity):
             self.actionReward += self.DO_NOTHING_REWARD
 
 
+        # updates the position
+        super().update()
+
+
+
+
         # if did not move or moved tried to move against a wall
         if self.getPosition().equals(self.lastPosition):
             self.actionReward += self.NOT_MOVING_REWARD
-        self.lastPosition = self.getPosition().copy()
+        else:
+            print("POS NOT EQUAL: b"+str(self.getPosition().getX())+"|"+str(self.getPosition().getY()))
+            print("POS NOT EQUAL: a"+str(self.lastPosition.getX())+"|"+str(self.lastPosition.getY()))
 
         # Updated the total reward based on the outcome of the last decisions
         self.totalReward += self.actionReward

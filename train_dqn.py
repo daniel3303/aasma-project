@@ -4,7 +4,7 @@ import sys
 import os
 import time
 
-from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN, save_model, load_modal
+from src.Agent.DeepLearningAgent.DeepLearningAgent import DeepLearningAgent, DQN
 from src.Agent.Reactive.ReactiveAgent import ReactiveAgent
 from src.Entity.Consumer import Consumer
 from src.Entity.HotSpot import HotSpot
@@ -45,13 +45,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     simulation = create_simulation_with_consumers()
 
     # Reactive agent
-    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(25, 25))
-    agent = ReactiveAgent(salesman)
-    simulation.addEntity(salesman)
-    simulation.addAgent(agent)
+    #salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(25, 25))
+    #agent = ReactiveAgent(salesman)
+    #simulation.addEntity(salesman)
+    #simulation.addAgent(agent)
 
     # Deep Q Learning Agent
-    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(25, 25))
+    salesman = Salesman(simulation, Vector2D(0, 0), Vector2D(25, 25))
     agent = DeepLearningAgent(salesman)
     simulation.addEntity(salesman)
     simulation.addAgent(agent)
@@ -61,6 +61,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     iters = 0
 
     while iters < MAX_EPISODE_SIZE:
+        print("\n\n")
         action = model.sample_action(observation, eps)
         prev_observation = observation
 
@@ -85,6 +86,15 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
         print(" iter: "+str(iters)+"/"+str(MAX_EPISODE_SIZE)+" ", end="")
 
+        print("\nPrev State: "+str(prev_observation))
+        print("Action: "+str(action))
+        print("Next State: "+str(observation))
+        print("Current Q (tmodel): ")
+        print(model.print_Q([[0,0], [15,0], [0,15], [15,15]], tmodel))
+
+        print("EXPERINCES")
+        model.printExperience()
+
         iters += 1
 
         if iters % copy_period == 0:
@@ -94,34 +104,18 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    loadModel = False
-
-
-    if "--model" in sys.argv:
-        modelName = sys.argv[2]
-        if os.path.isfile("models/" + modelName + ".npy"):
-            loadModel = True
-    else:
-        raise ValueError("Provide a model name with --model")
-
-
     gamma = 0.99
-    copy_period = 50
+    copy_period = 100
 
-    D = 26 #fix me make it dynamic
+    D = 2 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [512, 512]
+    sizes = [52]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
     init = tf.global_variables_initializer()
     session.run(init)
-
-
-    if loadModel:
-        load_modal(session, model, modelName)
-        load_modal(session, tmodel, modelName+"_target")
 
     model.set_session(session)
     tmodel.set_session(session)
@@ -136,9 +130,6 @@ def main():
         if n % 1 == 0:
             print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
-            save_model(session, model, modelName)
-            save_model(session, tmodel, modelName+"_target")
-            print("Model saved with name %s" % modelName)
 
 
     print("avg reward for last 100 episodes:", totalrewards[-100:].mean())
