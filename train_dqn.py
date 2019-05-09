@@ -112,12 +112,12 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 def main():
     gamma = 0.95
-    copy_period = 50
+    copy_period = 2000
 
     D = 20 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [256, 128]
+    sizes = [512, 512]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
