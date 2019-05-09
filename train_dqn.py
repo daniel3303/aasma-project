@@ -19,21 +19,14 @@ def create_simulation_with_consumers() -> Simulation:
     world = World()
     simulation = Simulation(world)
 
-    hotspot = HotSpot(simulation, Vector2D(25, 25), Vector2D(25, 25))
+    hotspot = HotSpot(simulation, Vector2D(50, 50), Vector2D(50, 50))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(250, 75), Vector2D(25, 25))
+    hotspot = HotSpot(simulation, Vector2D(200, 200), Vector2D(50, 50))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(75, 300), Vector2D(25, 25))
-    simulation.addEntity(hotspot)
-
-    hotspot = HotSpot(simulation, Vector2D(200, 200), Vector2D(25, 25))
-    simulation.addEntity(hotspot)
-
-
-    for i in range(0,6):
-        consumer = Consumer(simulation, Vector2D(25, 25), Vector2D(25,25))
+    for i in range(0, 3):
+        consumer = Consumer(simulation, Vector2D(50, 50), Vector2D(50, 50))
         simulation.addEntity(consumer)
 
     return simulation
@@ -45,13 +38,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     simulation = create_simulation_with_consumers()
 
     # Reactive agent
-    salesman = Salesman(simulation, Vector2D(25, 25), Vector2D(25, 25))
+    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
     agent = ReactiveAgent(salesman)
     simulation.addEntity(salesman)
     simulation.addAgent(agent)
 
     # Deep Q Learning Agent
-    salesman = Salesman(simulation, Vector2D(25, 25), Vector2D(25, 25))
+    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
     agent = DeepLearningAgent(salesman)
     simulation.addEntity(salesman)
     simulation.addAgent(agent)
@@ -111,13 +104,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    gamma = 0.95
+    gamma = 0.99
     copy_period = 2000
 
-    D = 20 #fix me make it dynamic
+    D = 11 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [512, 512]
+    sizes = [1024, 128]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()

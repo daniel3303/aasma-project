@@ -98,7 +98,7 @@ class DeepLearningAgent(AbstractAgent):
         # other entities position
         for entity in entities:
             if isinstance(entity, Consumer):
-                observation += [entity.getX(), entity.getX(), float(entity.getNumStepsSinceLastSellingAttempt())]
+                observation += [entity.getX(), entity.getX(), float(entity.getWantsToBuy())]
 
         return observation
 

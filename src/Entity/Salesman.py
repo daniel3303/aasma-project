@@ -14,11 +14,11 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 4
-    SELL_FAILED_REWARD = -0.1
+    SELL_SUCCESSED_REWARD = 100
+    SELL_FAILED_REWARD = 0
     MOVING_REWARD = 0
     DO_NOTHING_REWARD = 0
-    NOT_MOVING_REWARD = -0.1
+    NOT_MOVING_REWARD = -5
 
     """SELL_SUCCESSED_REWARD = -10
     SELL_FAILED_REWARD = -10

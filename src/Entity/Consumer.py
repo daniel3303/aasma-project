@@ -14,16 +14,17 @@ if TYPE_CHECKING:
     from src.Entity.Salesman import Salesman
 
 class Consumer(Entity):
-    MIN_STEPS_BETWEEN_SELLS = 300 #10 seconds at 30fps
+    MIN_STEPS_BETWEEN_SELLS = 240 #8 seconds at 30fps
+    MAX_STEPS_BETWEEN_SELLS = 390 #13 seconds at 30fps
 
     wantsToBuy: bool
-    stepsSinceLastSellingAttempt: int
+    stepsToUpdateBuyIntention: int
     walker: Walker
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
         self.wantsToBuy = False
-        self.stepsSinceLastSellingAttempt = 0
+        self.stepsToUpdateBuyIntention = 0
         self.setWalker(RandomWalker())
 
     def loadAssets(self) -> None:
@@ -46,24 +47,26 @@ class Consumer(Entity):
             self.setWalker(RandomWalker())
 
         self.walker.walk()
-        self.stepsSinceLastSellingAttempt += 1
+        self.updateBuyIntention()
 
     def getWalker(self) -> 'Walker':
         return self.walker
 
-    def buy(self, seller: 'Salesman') -> bool:
-        if(self.stepsSinceLastSellingAttempt / Consumer.MIN_STEPS_BETWEEN_SELLS >= 1):
-            self.wantsToBuy = random.random() >= 0.6
-            self.stepsSinceLastSellingAttempt = 0
+    def updateBuyIntention(self) -> None:
+        self.stepsToUpdateBuyIntention -= 1
 
+        if self.stepsToUpdateBuyIntention <= 0:
+            self.wantsToBuy = random.random() >= 0.6
+            self.stepsToUpdateBuyIntention = random.randint(Consumer.MIN_STEPS_BETWEEN_SELLS, Consumer.MAX_STEPS_BETWEEN_SELLS)
+
+    def buy(self, seller: 'Salesman') -> bool:
         if(self.wantsToBuy == True):
             self.wantsToBuy = False
-            self.stepsSinceLastSellingAttempt = 0
             return True
-        else:
-            return False
 
-    def getNumStepsSinceLastSellingAttempt(self) -> int:
-        return self.stepsSinceLastSellingAttempt
+        return False
+
+    def getWantsToBuy(self) -> bool:
+        return self.wantsToBuy
 
 
