@@ -13,7 +13,7 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 100000
+MAX_EPISODE_SIZE = 200
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
@@ -61,7 +61,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     iters = 0
 
     while iters < MAX_EPISODE_SIZE:
-        print("\n\n")
+        #print("\n\n")
         action = model.sample_action(observation, eps)
         prev_observation = observation
 
@@ -86,19 +86,25 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
         print(" iter: "+str(iters)+"/"+str(MAX_EPISODE_SIZE)+" ", end="")
 
-        print("\nPrev State: "+str(prev_observation))
+        """print("\nPrev State: "+str(prev_observation))
         print("Action: "+str(action))
         print("Next State: "+str(observation))
         print("Current Q (tmodel): ")
-        print(model.print_Q([[0,0], [15,0], [0,15], [15,15]], tmodel))
+        print(model.print_Q([[0,0], [15,0], [0,15], [15,15]], tmodel))"""
 
-        print("EXPERINCES")
-        model.printExperience()
+        #print("EXPERINCES")
+        #model.printExperience()
 
         iters += 1
 
         if iters % copy_period == 0:
             tmodel.copy_from(model)
+
+    #print("Current Q (tmodel): ")
+    #print(model.print_Q([[0, 0], [15, 0], [0, 15], [15, 15]], tmodel))
+    #print("EXPERINCES")
+    #model.printExperience()
+
 
     return totalreward
 

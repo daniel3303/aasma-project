@@ -14,11 +14,11 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 0
-    SELL_FAILED_REWARD = 0
-    MOVING_REWARD = 0
+    SELL_SUCCESSED_REWARD = 1
+    SELL_FAILED_REWARD = -0.05
+    MOVING_REWARD = -0.03
     DO_NOTHING_REWARD = 0
-    NOT_MOVING_REWARD = -1
+    NOT_MOVING_REWARD = -0.1
 
     sales: ['Consumer']
     totalReward: float
@@ -74,19 +74,15 @@ class Salesman(Entity):
         if self.actionMoveUp:
             self.getVelocity().setX(0)
             self.getVelocity().setY(-self.maxVelocity)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveDown:
             self.getVelocity().setX(0)
             self.getVelocity().setY(self.maxVelocity)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveLeft:
             self.getVelocity().setX(-self.maxVelocity)
             self.getVelocity().setY(0)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveRight:
             self.getVelocity().setX(self.maxVelocity)
             self.getVelocity().setY(0)
-            self.actionReward += self.MOVING_REWARD
         else:
             self.actionReward += self.DO_NOTHING_REWARD
 
@@ -101,8 +97,7 @@ class Salesman(Entity):
         if self.getPosition().equals(self.lastPosition):
             self.actionReward += self.NOT_MOVING_REWARD
         else:
-            print("POS NOT EQUAL: b"+str(self.getPosition().getX())+"|"+str(self.getPosition().getY()))
-            print("POS NOT EQUAL: a"+str(self.lastPosition.getX())+"|"+str(self.lastPosition.getY()))
+            self.actionReward += self.MOVING_REWARD
 
         # Updated the total reward based on the outcome of the last decisions
         self.totalReward += self.actionReward

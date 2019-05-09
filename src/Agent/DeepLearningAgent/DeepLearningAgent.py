@@ -38,7 +38,7 @@ class DeepLearningAgent(AbstractAgent):
     def decide(self):
         salesman = self.salesman
 
-        print("Deciding: "+str(self.getCurrentActionName()))
+        #print("Deciding: "+str(self.getCurrentActionName()))
 
         if self.nextAction == 0:
             salesman.moveRight()
@@ -126,7 +126,7 @@ class HiddenLayer:
 
 
 class DQN:
-    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=1, batch_sz=1):
+    def __init__(self, D, K, hidden_layer_sizes, gamma, max_experiences=50000, min_experiences=100, batch_sz=32):
         self.K = K
 
         # create the graph
@@ -208,13 +208,13 @@ class DQN:
         next_Q = np.max(target_network.predict(next_states), axis=1)
         targets = [r + self.gamma * next_q if not done else r for r, next_q, done in zip(rewards, next_Q, dones)]
 
-        print("IN TRAIN")
+        """print("IN TRAIN")
         print("states: "+str(states))
         print("actions: "+str(actions))
         print("rewards: "+str(rewards))
         print("next states: "+str(next_states))
         print("next Q: "+str(next_Q))
-        print("OUT TRAIN")
+        print("OUT TRAIN")"""
 
 
         # call optimizer
@@ -245,7 +245,7 @@ class DQN:
         self.experience['done'].append(done)
 
     def printExperience(self):
-        for ind in range(0, len(self.experience["s"])):
+        for ind in range(len(self.experience["s"])-20, len(self.experience["s"])):
             print(str(self.experience["s"][ind]) + " | " + str(self.experience["a"][ind]) + " | " + str(self.experience["r"][ind]) + " | " + str(self.experience["s2"][ind]))
 
     def sample_action(self, x, eps):
