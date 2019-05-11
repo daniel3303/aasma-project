@@ -14,11 +14,11 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 1000
-    SELL_FAILED_REWARD = 0
+    SELL_SUCCESSED_REWARD = 5000
+    SELL_FAILED_REWARD = -1000
     MOVING_REWARD = 0
     DO_NOTHING_REWARD = 0
-    NOT_MOVING_REWARD = -100
+    NOT_MOVING_REWARD = -150
 
     """SELL_SUCCESSED_REWARD = -10
     SELL_FAILED_REWARD = -10
@@ -128,6 +128,9 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
+
+        # reset velocity
+        self.getVelocity().setX(0).setY(0)
 
     #### AVAILABLE ACTIONS ####
     def doNothing(self) -> None:
