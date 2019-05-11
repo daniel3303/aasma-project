@@ -13,7 +13,7 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 2000
+MAX_EPISODE_SIZE = 10000
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
@@ -25,7 +25,8 @@ def create_simulation_with_consumers() -> Simulation:
     hotspot = HotSpot(simulation, Vector2D(200, 200), Vector2D(50, 50))
     simulation.addEntity(hotspot)
 
-    for i in range(0, 3):
+    #for i in range(0, 3):
+    for i in range(0, 1):
         consumer = Consumer(simulation, Vector2D(50, 50), Vector2D(50, 50))
         simulation.addEntity(consumer)
 
@@ -38,10 +39,10 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     simulation = create_simulation_with_consumers()
 
     # Reactive agent
-    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
-    agent = ReactiveAgent(salesman)
-    simulation.addEntity(salesman)
-    simulation.addAgent(agent)
+    #salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
+    #agent = ReactiveAgent(salesman)
+    #simulation.addEntity(salesman)
+    #simulation.addAgent(agent)
 
     # Deep Q Learning Agent
     salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
@@ -75,13 +76,6 @@ def play_one(model, tmodel, eps, gamma, copy_period):
         model.train(tmodel)
 
 
-
-        """print("\nPrev State: "+str(prev_observation))
-        print("Action: "+str(action))
-        print("Next State: "+str(observation))
-        print("Current Q (tmodel): ")
-        print(model.print_Q([[0,0], [15,0], [0,15], [15,15]], tmodel))"""
-
         #print("EXPERINCES")
         #model.printExperience()
 
@@ -90,6 +84,11 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
         if iters % copy_period == 0:
             tmodel.copy_from(model)
+            print("\nPrev State: " + str(prev_observation))
+            print("Action: " + str(action))
+            print("Next State: " + str(observation))
+            print("Current Q (tmodel): ")
+            print(model.print_Q([[0, 0] + [0]*3, [0, 0] + [0]*2 + [1]], tmodel))
 
     #print("Current Q (tmodel): ")
     #print(model.print_Q([[0, 0], [15, 0], [0, 15], [15, 15]], tmodel))
@@ -101,13 +100,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    gamma = 0.99
-    copy_period = 2000
+    gamma = 0.90
+    copy_period = 5000
 
-    D = 11 #fix me make it dynamic
+    D = 5 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [1024, 128]
+    sizes = [126]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()

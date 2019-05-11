@@ -1,5 +1,7 @@
 from __future__ import print_function, division
 from builtins import range
+import random
+
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -98,7 +100,7 @@ class DeepLearningAgent(AbstractAgent):
         # other entities position
         for entity in entities:
             if isinstance(entity, Consumer):
-                observation += [entity.getX(), entity.getX(), float(entity.getWantsToBuy())]
+                observation += [entity.getX(), entity.getY(), float(entity.getWantsToBuy())]
 
         return observation
 
@@ -108,7 +110,7 @@ class DeepLearningAgent(AbstractAgent):
 
 # A version of HiddenLayer that keeps track of params
 class HiddenLayer:
-    def __init__(self, M1, M2, f=tf.nn.relu):
+    def __init__(self, M1, M2, f=tf.nn.tanh):
         self.W = tf.Variable(tf.random_normal(shape=(M1, M2)))
         self.W_other = tf.placeholder(dtype=tf.float32, shape=(M1, M2))
 
@@ -215,13 +217,17 @@ class DQN:
         next_Q = np.max(target_network.predict(next_states), axis=1)
         targets = [r + self.gamma * next_q for r, next_q in zip(rewards, next_Q)]
 
-        """print("IN TRAIN")
-        print("states: "+str(states))
-        print("actions: "+str(actions))
-        print("rewards: "+str(rewards))
-        print("next states: "+str(next_states))
-        print("next Q: "+str(next_Q))
-        print("OUT TRAIN")"""
+        #if random.randint(0,2000) == 1999:
+            #print("IN TRAIN")
+            #print("states: "+str(states))
+            #print("actions: "+str(actions))
+            #print("rewards: "+str(rewards))
+            #print("next states: "+str(next_states))
+            #print("next Q: "+str(next_Q))
+            #print("OUT TRAIN")
+            #print("Q FOR NEXT STATE:" + str(next_Q))
+            #print("TARGETS:" + str(targets))
+            #pass
 
 
         # call optimizer
