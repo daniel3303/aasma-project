@@ -40,7 +40,7 @@ simulation.addAgent(agent)
 # Deep Q Learning Agent
 salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
 #agent = DeepLearningAgent(salesman, model="episode_123")
-agent = DeepLearningAgent(salesman, model="episode_136")
+agent = DeepLearningAgent(salesman, model="reactive_vs_deep_learning/episode_136")
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
 
