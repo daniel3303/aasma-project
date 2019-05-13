@@ -14,11 +14,20 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 3
-    SELL_FAILED_REWARD = -0.010
-    MOVING_REWARD = -0.001
-    DO_NOTHING_REWARD = -0.005
-    NOT_MOVING_REWARD = -0.0125
+    # Train
+    """SELL_SUCCESSED_REWARD = 500000
+    SELL_FAILED_REWARD = -20000
+    MOVING_REWARD = 0
+    DO_NOTHING_REWARD = 0
+    NOT_MOVING_REWARD = -10000"""
+
+    # Running
+    SELL_SUCCESSED_REWARD = 100
+    SELL_FAILED_REWARD = -1
+    MOVING_REWARD = 0
+    DO_NOTHING_REWARD = 0
+    NOT_MOVING_REWARD = 0
+
 
     sales: ['Consumer']
     totalReward: float
@@ -60,7 +69,7 @@ class Salesman(Entity):
         self.myfont = pygame.font.SysFont('Comic Sans MS', 22)
 
     def update(self):
-        super().update() #does nothing
+        self.lastPosition = self.getPosition().copy()
         self.actionReward = 0
 
         if self.actionSell:
@@ -69,27 +78,30 @@ class Salesman(Entity):
         if self.actionMoveUp:
             self.getVelocity().setX(0)
             self.getVelocity().setY(-self.maxVelocity)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveDown:
             self.getVelocity().setX(0)
             self.getVelocity().setY(self.maxVelocity)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveLeft:
             self.getVelocity().setX(-self.maxVelocity)
             self.getVelocity().setY(0)
-            self.actionReward += self.MOVING_REWARD
         elif self.actionMoveRight:
             self.getVelocity().setX(self.maxVelocity)
             self.getVelocity().setY(0)
-            self.actionReward += self.MOVING_REWARD
         else:
             self.actionReward += self.DO_NOTHING_REWARD
+
+
+        # updates the position
+        super().update()
+
+
 
 
         # if did not move or moved tried to move against a wall
         if self.getPosition().equals(self.lastPosition):
             self.actionReward += self.NOT_MOVING_REWARD
-        self.lastPosition = self.getPosition().copy()
+        else:
+            self.actionReward += self.MOVING_REWARD
 
         # Updated the total reward based on the outcome of the last decisions
         self.totalReward += self.actionReward
@@ -100,7 +112,7 @@ class Salesman(Entity):
 
     def draw(self, screen):
         super().draw(screen)
-        textsurface = self.myfont.render("{0:.2f}".format(self.totalReward), False, (255, 0, 0))
+        textsurface = self.myfont.render("{0:.0f}".format(self.totalReward), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
 
 
@@ -118,6 +130,9 @@ class Salesman(Entity):
         self.actionMoveUp = False
         self.actionMoveRight = False
         self.actionSell = False
+
+        # reset velocity
+        self.getVelocity().setX(0).setY(0)
 
     #### AVAILABLE ACTIONS ####
     def doNothing(self) -> None:

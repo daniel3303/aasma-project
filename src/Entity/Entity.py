@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Entity:
     ID = 0
-    MAX_VELOCITY = 20
+    MAX_VELOCITY = 10
     VIEW_RANGE = 300
 
     # unique entity identifier
@@ -121,6 +121,7 @@ class Entity:
 
     def update(self) -> Entity:
         self.position.sum(self.velocity)
+        self.simulation.forceInBound(self)
         return self
 
     def loadAssets(self) -> None:

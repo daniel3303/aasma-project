@@ -1,5 +1,4 @@
 import random
-import time
 from typing import TYPE_CHECKING
 
 from src.AssetManager import AssetManager
@@ -15,16 +14,17 @@ if TYPE_CHECKING:
     from src.Entity.Salesman import Salesman
 
 class Consumer(Entity):
-    MIN_TIME_BETWEEN_SELLS = 5 #secs
+    MIN_STEPS_BETWEEN_SELLS = 1#240 #8 seconds at 30fps
+    MAX_STEPS_BETWEEN_SELLS = 5#390 #13 seconds at 30fps
 
     wantsToBuy: bool
-    nextWantToBuyCheck: int
+    stepsToUpdateBuyIntention: int
     walker: Walker
 
     def __init__(self, simulation: Simulation, position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
         self.wantsToBuy = False
-        self.nextWantToBuyCheck = int(round(time.time() * 1000))
+        self.stepsToUpdateBuyIntention = 0
         self.setWalker(RandomWalker())
 
     def loadAssets(self) -> None:
@@ -47,28 +47,26 @@ class Consumer(Entity):
             self.setWalker(RandomWalker())
 
         self.walker.walk()
+        self.updateBuyIntention()
 
     def getWalker(self) -> 'Walker':
         return self.walker
 
-    def buy(self, seller: 'Salesman') -> bool:
-        currentTime = int(round(time.time() * 1000))
+    def updateBuyIntention(self) -> None:
+        self.stepsToUpdateBuyIntention -= 1
 
-        if(currentTime - self.nextWantToBuyCheck > 0):
+        if self.stepsToUpdateBuyIntention <= 0:
             self.wantsToBuy = random.random() >= 0.6
-            self.nextWantToBuyCheck = currentTime + self.MIN_TIME_BETWEEN_SELLS * 1000
+            self.stepsToUpdateBuyIntention = random.randint(Consumer.MIN_STEPS_BETWEEN_SELLS, Consumer.MAX_STEPS_BETWEEN_SELLS)
 
+    def buy(self, seller: 'Salesman') -> bool:
         if(self.wantsToBuy == True):
             self.wantsToBuy = False
             return True
-        else:
-            return False
 
-    def getWasRecentlyAskedToBuy(self) -> bool:
-        currentTime = int(round(time.time() * 1000))
+        return False
 
-        if (currentTime - self.nextWantToBuyCheck > 0):
-            return False
-        return True
+    def getWantsToBuy(self) -> bool:
+        return self.wantsToBuy
 
 

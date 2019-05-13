@@ -29,7 +29,7 @@ class RandomWalker(Walker):
             num = randint(0,3)
             self.movement[num] = 1
             self.movement = self.movement * entity.getMaxVelocity()
-            self.remainingSteps = randint(0,20)
+            self.remainingSteps = randint(0,10)
         else:
             self.remainingSteps -= 1
 
