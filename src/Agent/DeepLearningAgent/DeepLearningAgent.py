@@ -15,10 +15,35 @@ from src.Entity.Consumer import Consumer
 class DeepLearningAgent(AbstractAgent):
     nextAction: int
 
+    # for training debug
+    actionCount: []
+
+    # model
+    model: "DQN"
+
     def __init__(self, salesman: Salesman, model=None):
         super().__init__(salesman)
         salesman.setName("Deep Q Learning")
         self.nextAction = 0
+        self.model = None
+
+        # for training debug. right, down, left, up, sell
+        self.actionCount = [0,0,0,0,0]
+
+        if model != None:
+            session = tf.Session()
+            gamma = 0.95
+            D = 14  # fix me make it dynamic
+            K = 5  # fix me make it dynamic
+            sizes = [16384]
+            self.model = DQN(D, K, sizes, gamma)
+            self.model.set_session(session)
+            init = tf.global_variables_initializer()
+            session.run(init)
+            saver = tf.train.Saver()
+            self.saver = saver
+            self.saver.restore(session, "models/" + model + ".ckpt")
+
 
 
     # Decides which action to take next
@@ -40,22 +65,33 @@ class DeepLearningAgent(AbstractAgent):
     def decide(self):
         salesman = self.salesman
 
+        if self.model is not None:
+            action = self.model.predictSingle(self.getCurrentObservation())
+            self.setNextAction(action)
+
         #print("Deciding: "+str(self.getCurrentActionName()))
 
         if self.nextAction == 0:
             salesman.moveRight()
+            self.actionCount[0] += 1
         elif self.nextAction == 1:
             salesman.moveDown()
+            self.actionCount[1] += 1
         elif self.nextAction == 2:
             salesman.moveLeft()
+            self.actionCount[2] += 1
         elif self.nextAction == 3:
             salesman.moveUp()
+            self.actionCount[3] += 1
         elif self.nextAction == 4:
             salesman.sell()
+            self.actionCount[4] += 1
         else:
             print("ERROR: INVALID ACTION")
 
-        print("sales: "+str(salesman.numSales)+" pos:"+str(salesman.getX())+","+str(salesman.getY())+" action: "+self.getCurrentActionName(), end="")
+        if self.model is None:
+            print("right: "+str(self.actionCount[0])+" down: "+str(self.actionCount[1])+" left: "+str(self.actionCount[2])+" up: "+str(self.actionCount[3])+" sell: "+str(self.actionCount[4]), end="")
+            print(" sales: "+str(salesman.numSales)+" pos:"+str(salesman.getX())+","+str(salesman.getY())+" action: "+self.getCurrentActionName(), end="")
 
     def setNextAction(self, action: int) -> None:
         self.nextAction = action
@@ -110,7 +146,7 @@ class DeepLearningAgent(AbstractAgent):
 
 # A version of HiddenLayer that keeps track of params
 class HiddenLayer:
-    def __init__(self, M1, M2, f=tf.nn.tanh):
+    def __init__(self, M1, M2, f=tf.nn.relu):
         self.W = tf.Variable(tf.random_normal(shape=(M1, M2)))
         self.W_other = tf.placeholder(dtype=tf.float32, shape=(M1, M2))
 
@@ -241,7 +277,7 @@ class DQN:
             }
         )
 
-        print("cost: {0:08.2f} ".format(np.sum(cost)) + " ", end="")
+        print("cost: {0:012.2f} ".format(np.sum(cost)) + " ", end="")
 
 
     def add_experience(self, s, a, r, s2):
@@ -255,6 +291,9 @@ class DQN:
         self.experience['r'].append(r)
         self.experience['s2'].append(s2)
 
+        #with open('training-data.txt', 'a+') as f:
+                #f.write(""+str(s)+","+str(a)+","+str(r)+"," +str(s2)+"\n")
+
     def printExperience(self):
         for ind in range(len(self.experience["s"])-10, len(self.experience["s"])):
             print(str(self.experience["s"][ind]) + " | " + str(self.experience["a"][ind]) + " | " + str(self.experience["r"][ind]) + " | " + str(self.experience["s2"][ind]))
@@ -265,6 +304,10 @@ class DQN:
         else:
             X = np.atleast_2d(x)
             return np.argmax(self.predict(X)[0])
+
+    def predictSingle(self, x):
+        X = np.atleast_2d(x)
+        return np.argmax(self.predict(X)[0])
 
     def print_Q(self, x, target_nn):
         if len(self.experience['s']) < self.min_experiences:

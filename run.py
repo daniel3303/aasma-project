@@ -22,24 +22,25 @@ screen = pygame.display.set_mode((world.getWorldWidth(),world.getWorldHeight()))
 hotspot = HotSpot(simulation, Vector2D(50,50), Vector2D(50,50))
 simulation.addEntity(hotspot)
 
-hotspot = HotSpot(simulation, Vector2D(200,200), Vector2D(50,50))
+hotspot = HotSpot(simulation, Vector2D(200,650), Vector2D(50,50))
 simulation.addEntity(hotspot)
 
 
-for i in range(0, 3):
-    consumer = Consumer(simulation, Vector2D(50, 50), Vector2D(50, 50))
+# Consumers
+for i in range(0, 4):
+    consumer = Consumer(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
     simulation.addEntity(consumer)
 
 # Reactive agent
-salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
+salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
 agent = ReactiveAgent(salesman)
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
 
 # Deep Q Learning Agent
-salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
-agent = DeepLearningAgent(salesman, model="reactive_vs_deep")
-#agent = DeepLearningAgent(salesman, model="test")
+salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
+#agent = DeepLearningAgent(salesman, model="episode_123")
+agent = DeepLearningAgent(salesman, model="episode_136")
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
 

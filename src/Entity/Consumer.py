@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from src.Entity.Salesman import Salesman
 
 class Consumer(Entity):
-    MIN_STEPS_BETWEEN_SELLS = 240 #8 seconds at 30fps
-    MAX_STEPS_BETWEEN_SELLS = 390 #13 seconds at 30fps
+    MIN_STEPS_BETWEEN_SELLS = 1#240 #8 seconds at 30fps
+    MAX_STEPS_BETWEEN_SELLS = 5#390 #13 seconds at 30fps
 
     wantsToBuy: bool
     stepsToUpdateBuyIntention: int

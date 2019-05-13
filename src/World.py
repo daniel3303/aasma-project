@@ -12,20 +12,24 @@ class World():
     buildingImage: object
 
     def __init__(self):
-        """self.world = np.array([
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,1],
-            [1,0,1,0,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,1],
-            [1,0,1,0,1,0,1,0,1],
-            [1,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-        ])"""
-
         self.world = np.array([
-            [0, 0],
-            [0, 0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         ])
+
+        #self.world = np.array([
+        #    [0, 0],
+        #    [0, 0],
+        #])
 
         self.tileDimensions = Vector2D(50,50)
         self.buildingImage = self.scaleTile(AssetManager.getAsset("building"))
@@ -79,3 +83,13 @@ class World():
 
         isWall = self.world[x][y] != 0
         return Tile(tilePos, self.tileDimensions, isWall)
+
+    def getRandomEmptyTile(self) -> 'Tile':
+        emptyTiles = []
+        for x, row in enumerate(self.world):
+            for y, pos in enumerate(row):
+                if self.world[x][y] == 0:
+                    emptyTiles.append(self.getTileAt(Vector2D(x*self.getTileWidth(), y*self.getTileHeight())))
+
+        return np.random.choice(emptyTiles)
+

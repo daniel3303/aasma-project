@@ -13,23 +13,22 @@ from src.Math.Vector2D import Vector2D
 from src.Simulation.Simulation import Simulation
 from src.World import World
 
-MAX_EPISODE_SIZE = 10000
+MAX_EPISODE_SIZE = 6000
 
 def create_simulation_with_consumers() -> Simulation:
     world = World()
     simulation = Simulation(world)
 
-    hotspot = HotSpot(simulation, Vector2D(50, 50), Vector2D(50, 50))
+    hotspot = HotSpot(simulation, Vector2D(150, 150), Vector2D(50, 50))
     simulation.addEntity(hotspot)
 
-    hotspot = HotSpot(simulation, Vector2D(200, 200), Vector2D(50, 50))
+    hotspot = HotSpot(simulation, Vector2D(200, 650), Vector2D(50, 50))
     simulation.addEntity(hotspot)
 
-    #for i in range(0, 3):
-    for i in range(0, 1):
-        consumer = Consumer(simulation, Vector2D(50, 50), Vector2D(50, 50))
+    # Consumers
+    for i in range(0, 4):
+        consumer = Consumer(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
         simulation.addEntity(consumer)
-
     return simulation
 
 
@@ -45,7 +44,7 @@ def play_one(model, tmodel, eps, gamma, copy_period):
     #simulation.addAgent(agent)
 
     # Deep Q Learning Agent
-    salesman = Salesman(simulation, Vector2D(50, 50), Vector2D(50, 50))
+    salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
     agent = DeepLearningAgent(salesman)
     simulation.addEntity(salesman)
     simulation.addAgent(agent)
@@ -84,11 +83,12 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
         if iters % copy_period == 0:
             tmodel.copy_from(model)
-            print("\nPrev State: " + str(prev_observation))
-            print("Action: " + str(action))
-            print("Next State: " + str(observation))
-            print("Current Q (tmodel): ")
-            print(model.print_Q([[0, 0] + [0]*3, [0, 0] + [0]*2 + [1]], tmodel))
+            #print("\n\nFroze new version of the model")
+            #print("Current Q (tmodel) at (50,50): ")
+            #model.print_Q([[50, 50] + [0]*12, [50, 50] + [0,0,1] * 4], tmodel)
+            #print("Current Q (tmodel) at (50,350): ")
+            #model.print_Q([[50, 350] + [0]*12, [50, 350] + [0,0,1] * 4], tmodel)
+            #print("")
 
     #print("Current Q (tmodel): ")
     #print(model.print_Q([[0, 0], [15, 0], [0, 15], [15, 15]], tmodel))
@@ -100,13 +100,13 @@ def play_one(model, tmodel, eps, gamma, copy_period):
 
 
 def main():
-    gamma = 0.90
-    copy_period = 5000
+    gamma = 0.9
+    copy_period = 3000
 
-    D = 5 #fix me make it dynamic
+    D = 14 #fix me make it dynamic
     K = 5 #fix me make it dynamic
 
-    sizes = [126]
+    sizes = [16384]
     model = DQN(D, K, sizes, gamma)
     tmodel = DQN(D, K, sizes, gamma)
     session = tf.InteractiveSession()
@@ -116,7 +116,7 @@ def main():
     model.set_session(session)
     tmodel.set_session(session)
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=0)
 
     N = 2000
     totalrewards = np.empty(N)
@@ -130,8 +130,6 @@ def main():
         if n % 1 == 0:
             print("episode:", n, "total reward:", totalreward, "eps:", eps, "avg reward (last 100):",
                   totalrewards[max(0, n - 100):(n + 1)].mean())
-
-        if n % 50 == 0:
             save_path = saver.save(session, "models/episode_"+str(n)+".ckpt")
             print("Episode's model saved at "+save_path)
 

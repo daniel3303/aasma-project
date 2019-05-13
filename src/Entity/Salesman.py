@@ -14,17 +14,20 @@ if TYPE_CHECKING:
     from src.Simulation.Simulation import Simulation
 
 class Salesman(Entity):
-    SELL_SUCCESSED_REWARD = 5000
-    SELL_FAILED_REWARD = -1000
+    # Train
+    """SELL_SUCCESSED_REWARD = 500000
+    SELL_FAILED_REWARD = -20000
     MOVING_REWARD = 0
     DO_NOTHING_REWARD = 0
-    NOT_MOVING_REWARD = -150
+    NOT_MOVING_REWARD = -10000"""
 
-    """SELL_SUCCESSED_REWARD = -10
-    SELL_FAILED_REWARD = -10
-    MOVING_REWARD = 1
+    # Running
+    SELL_SUCCESSED_REWARD = 100
+    SELL_FAILED_REWARD = -1
+    MOVING_REWARD = 0
     DO_NOTHING_REWARD = 0
-    NOT_MOVING_REWARD = -1"""
+    NOT_MOVING_REWARD = 0
+
 
     sales: ['Consumer']
     totalReward: float
@@ -110,7 +113,7 @@ class Salesman(Entity):
 
     def draw(self, screen):
         super().draw(screen)
-        textsurface = self.myfont.render("{0:.2f}".format(self.totalReward), False, (255, 0, 0))
+        textsurface = self.myfont.render("{0:.0f}".format(self.totalReward), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
 
 

@@ -5,11 +5,13 @@ from random import randint
 from typing import TYPE_CHECKING
 
 from src.Agent.AbstractAgent import AbstractAgent
+from src.Math.Vector2D import Vector2D
 
 if(TYPE_CHECKING):
     from src.Entity.Salesman import Salesman
     from src.Entity.Entity import Entity
     from src.Entity.Consumer import Consumer
+    from src.Tile import Tile
 
 from src.World import World
 
@@ -89,6 +91,10 @@ class Simulation:
                 seller.onSuccessSale(buyer)
             else:
                 seller.onFailedSale(buyer)
+
+        # else no buyer around
+        else:
+            seller.onFailedSale(None)
 
     def getClosestConsumerInView(self, entity: Entity) -> Consumer:
         from src.Entity.Consumer import Consumer
@@ -211,3 +217,9 @@ class Simulation:
 
     def getEntities(self) -> [Entity]:
         return self.entities.copy()
+
+    def getRandomEmptyTile(self) -> 'Tile':
+        return self.world.getRandomEmptyTile()
+
+    def getRandomEmptyPlace(self) -> 'Vector2D':
+        return self.world.getRandomEmptyTile().getWorldPosition()
