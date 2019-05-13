@@ -45,7 +45,6 @@ class Salesman(Entity):
 
     name: str
 
-
     def __init__(self, simulation: 'Simulation', position: Vector2D, dimensions: Vector2D) -> None:
         super().__init__(simulation, position, dimensions)
 
