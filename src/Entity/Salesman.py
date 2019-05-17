@@ -41,7 +41,6 @@ class Salesman(Entity):
     actionMoveLeft: bool
     actionMoveRight: bool
     actionSell: bool
-    actionSellTo: 'Consumer'
 
     name: str
 

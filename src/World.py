@@ -26,10 +26,6 @@ class World():
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         ])
 
-        #self.world = np.array([
-        #    [0, 0],
-        #    [0, 0],
-        #])
 
         self.tileDimensions = Vector2D(50,50)
         self.buildingImage = self.scaleTile(AssetManager.getAsset("building"))
