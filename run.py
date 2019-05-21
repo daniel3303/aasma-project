@@ -33,14 +33,15 @@ for i in range(0, 4):
 
 # Reactive agent
 salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
+#agent = ReactiveAgent(salesman)
+#agent = DeepLearningAgent(salesman, model="reactive_vs_deep_learning/episode_136")
 agent = ReactiveAgent(salesman)
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
 
 # Deep Q Learning Agent
 salesman = Salesman(simulation, simulation.getRandomEmptyPlace(), Vector2D(50, 50))
-#agent = DeepLearningAgent(salesman, model="episode_123")
-agent = DeepLearningAgent(salesman, model="reactive_vs_deep_learning/episode_0")
+agent = DeepLearningAgent(salesman, model="reactive_vs_deep_learning/episode_136")
 simulation.addEntity(salesman)
 simulation.addAgent(agent)
 

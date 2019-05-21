@@ -111,7 +111,7 @@ class Salesman(Entity):
 
     def draw(self, screen):
         super().draw(screen)
-        textsurface = self.myfont.render("{0:.0f}".format(self.totalReward), False, (255, 0, 0))
+        textsurface = self.myfont.render(str(self.name[0])+" {0:.0f}".format(self.totalReward), False, (255, 0, 0))
         screen.blit(textsurface, (self.getX()+self.getWidth(), self.getY() + self.getHeight()))
 
 
